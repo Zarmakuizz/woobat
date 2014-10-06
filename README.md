@@ -1,7 +1,6 @@
 WOOBAT
 ======
 Webapp Operator for Organizers, Better than the Atrocious TOM
-====
 
 I am a Tournament Organizers from the Pokémon TCG community. For a tournament to run, you need a software doing pairings to determine who plays against who. You may do it yourself with papers and random means, but you'll quickly get a headache doing so. Better use a software for that.
 
