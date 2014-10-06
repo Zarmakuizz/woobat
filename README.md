@@ -13,4 +13,5 @@ Technologies used : As a webapp, mostly HTML5 things - so a lot of Javascript.
 FAQ
 ======
 > What is a WOOBAT ?
+
 ![GitHub Logo](woobat.png)
