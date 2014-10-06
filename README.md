@@ -1,4 +1,3 @@
-![GitHub Logo](woobat.png)
 WOOBAT
 ======
 Webapp Operator for Organizers, Better than the Atrocious TOM
@@ -10,3 +9,8 @@ TOM is the official solution to pair players, given by TPCi for Pokémon Tournam
 WOOBAT is a webapp that could be run offline with the basic fonctionnalities you could expect from a desktop client. We first aim to make WOOBAT as functional as TOM - then we'll use the power of the web to bring more features.
 
 Technologies used : As a webapp, mostly HTML5 things - so a lot of Javascript.
+
+FAQ
+======
+> What is a WOOBAT ?
+![GitHub Logo](woobat.png)
