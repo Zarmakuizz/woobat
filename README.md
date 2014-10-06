@@ -1,3 +1,4 @@
+![GitHub Logo](woobat.png)
 WOOBAT
 ======
 Webapp Operator for Organizers, Better than the Atrocious TOM
