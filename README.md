@@ -14,4 +14,4 @@ FAQ
 ======
 > What is a WOOBAT ?
 
-![GitHub Logo](woobat.png)
+![GitHub Logo](img/woobat.png)

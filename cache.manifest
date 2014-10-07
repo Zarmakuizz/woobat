@@ -1,5 +1,8 @@
 CACHE MANIFEST
-NETWORK:
 
+NETWORK:
+/cache.manifest
 CACHE:
-/woobat.png
+img/*
+data/*
+css/*
