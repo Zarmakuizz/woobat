@@ -28,7 +28,18 @@ header p{
     font-size:1em;
 }
 
-
+.button{
+    font-size:1.25em;
+    margin:0.25em;
+    padding:0.25em 1em;
+    border: 1px solid;
+    border-radius: 3px;
+}
+.ok{
+    border-color: #1F8DD6;
+    color: #FFFFFF;
+    background: none repeat scroll 0% 0% #1F8DD6;
+}
 @font-face {
   font-family: "myriad-pro";
   font-style: normal;
