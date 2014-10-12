@@ -1,6 +1,13 @@
 body{
     font-family: myriad-pro, ff-tisa-web-pro, Arial, Helvetica, Verdana, serif;
 }
+body > div {
+    padding: 2em;
+}
+/* On Firefox, any resetted forms is full of red border without that */
+input:required{ 
+    box-shadow:none;
+}
 header{
     width:100%;
     background-color:#333333;
@@ -29,17 +36,36 @@ header p{
 }
 
 .button{
+    display:inline-block;
     font-size:1.25em;
     margin:0.25em;
     padding:0.25em 1em;
     border: 1px solid;
     border-radius: 3px;
 }
+.small{
+    font-size:0.9em;
+    padding:0.1em 0.5em;
+}
 .ok{
     border-color: #1F8DD6;
     color: #FFFFFF;
     background: none repeat scroll 0% 0% #1F8DD6;
 }
+
+#add_players, #check, #tournament{
+    display:none;
+}
+#add_player_form{
+    display:block;
+}
+#add_player_form div label, #add_player_form div input[type="text"]{
+    display:block;
+    box-sizing:border-box;
+    width:95%;
+    vertical-align:top;
+}
+
 @font-face {
   font-family: "myriad-pro";
   font-style: normal;
