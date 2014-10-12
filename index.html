@@ -39,7 +39,7 @@
                 <label for="tourny_country" class="col-1-4" title="Where are you running the tournament?">Tournament country</label>
                 <input type="text" name="tourny_country" id="tourny_country" class="col-1-3"/>
                 <p  class="col-5-12"></p>
-             <input type="submit" name="id_form_submit" id="id_form_submit" value="Done!" class="button ok"><p style="display:inline-block;">Now let's add players.</p>
+             <input type="submit" name="id_form_submit" id="id_form_submit" value="Done!" class="button ok"><p style="display:inline-block;">Now let's add players to this tournament.</p>
         </div>
         <!-- div with contents to manage players: add/edit/remove players -->
         <div id="add_players" class="grid grid-pad">
@@ -49,8 +49,9 @@
             <!-- Area to display known players with add and filtering -->
             <h2>Now, let's add some players to the tournament.</h2>
             <div id="previously_known" class="col-1-1">
-                <h3>This is the list of known players from previous events.</h3><p><a class="button small ok" id="load_players_xml">Load a players.xml file</a> to get more players from your existing TOM, or <a class="button small ok">Save the actual list</a>.</p>
+                <h3>This is the list of known players from previous events.</h3><p><a class="button small ok" id="load_players_xml">Load a players.xml file</a> to get more players from your existing TOM, or <a class="button small ok" id="export_players_xml">Save the actual list</a>.</p>
                 <form name="secret_load_players_xml" id="secret_load_players_xml" style="display:none;">
+                    <a id='lpx_export'>You don't see this</a>
                     <input type="file" name="xml_file" id="lpx_input"/>
                 </form>
                 <table id="known" class="col-1-1">

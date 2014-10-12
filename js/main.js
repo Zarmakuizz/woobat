@@ -10,7 +10,6 @@ function Player(pid, firstName, lastName, birthDate) {
 }
 /** Takes a table line and makes it into a player */
 var trToPlayer = function(tr){
-    console.log(tr);
     var tds = tr.querySelectorAll('td');
     // TODO defensive programing
     return new Player(tds[0].innerHTML,tds[1].innerHTML,
@@ -84,6 +83,30 @@ var importPlayers = function(evt){
     }
     reader.readAsText(xmlFile); 
 } 
+/** Export list of players following the syntax in data/players.xml */
+var exportPlayers = function(evt){
+    var playersTr = document.querySelectorAll('#known tbody tr');
+    var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<players>\n';
+    for(var i=0; i<playersTr.length; i++){
+        var player = trToPlayer(playersTr[i]);
+        xml += '\t<player userid="'+player.pid+'">\n';
+        xml += '\t\t<firstname>'+player.firstName+'</firstname>\n';
+        xml += '\t\t<lastname>'+player.lastName+'</lastname>\n';
+        xml += '\t\t<birthdate>'+player.birthDate+'</birthdate>\n';
+        xml += '\t\t<creationdate>'+'09/20/2014 10:10:14'+'</creationdate>\n';
+        xml += '\t\t<lastmodifieddate>'+'09/20/2014 10:10:14'+'</lastmodifieddate>\n';
+        // TODO get current date
+        xml += '\t</player>\n;'
+    }
+    xml+='\n</players>'
+
+    // Offer a file to download
+    var pom = document.querySelector('#lpx_export'); // get a hidden <a>
+    pom.setAttribute('href','data:application/xml;charset=utf-8,'+encodeURIComponent(xml));
+    pom.setAttribute('download','players.xml');
+    pom.click();
+
+}
 /** Event fired when a player is added to the
 tournament     using the add form. */ 
 var addFormPlayer = function(evt){     
@@ -156,6 +179,9 @@ document.querySelector('#secret_load_players_xml').action="javascript:void(0);";
 document.querySelector('#lpx_input').addEventListener('change', importPlayers);
 document.querySelector('#load_players_xml').addEventListener('click',loadPlayerFile);
 document.querySelector('#load_players_xml').addEventListener('touchend',loadPlayerFile);
+document.querySelector('#export_players_xml').addEventListener('click',exportPlayers);
+document.querySelector('#export_players_xml').addEventListener('touchend',exportPlayers);
+
 document.querySelector('#add_player_form').action="javascript:void(0);";
 document.querySelector('#add_form_submit').addEventListener('click', addFormPlayer);
 document.querySelector('#add_form_submit').addEventListener('touchend', addFormPlayer);
