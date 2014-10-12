@@ -17,18 +17,21 @@ Simple Grid (MIT license) - css library for a responsive grid.
 TODO List
 ======
 PRIORITY
-* Start a tournament - WIP
+* Initiate tournament - WIP
 * Register players - WIP
+* Resume initiation before starting tournament - SOON
 * Single Elimination pairing algorithm (with age groups)
 * Swiss Round pairing algorithm (with age groups and ties)
 * Tops after Swiss rounds consisting of either Single Elimination finals or more rounds + Single Eliminations
 * View to display pairings and enter tournament results
-* Export ended tournament as a tdf
+* Export finished tournament as a tdf
 
 SECONDARY
-* Manage players storage - WIP
-* Load tournament as a tdf
-* Export tournament as a tdf anytime
+* Import players from a user's players.xml file from TOM - DONE
+* Export players for the user's TOM - DONE
+* Edit/remove players from the list of known users
+* Load tournament as a tdf - SOON
+* Export tournament as a tdf anytime - SOON
 * Offline mode
 * tweaks everywhere after testings TO BE DETERMINED
 
