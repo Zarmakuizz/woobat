@@ -9,7 +9,44 @@ function Player(pid, firstName, lastName, birthDate) {
     // TODO add pairing management
 }
 
+/** Add a player to a list of players.
+    @param player a Player object. 
+    @param id The id to the list of players. Currently supported are #known and #registered.*/
+var addPlayer = function(player, id){
+    // TODO defensive programming
+    var target = document.querySelector(id+' tbody');
+    var newRow = target.insertRow(target.rows.length);
+    // TODO improve insertion. Or offer some auto-filtering somewhere.
+    
+    var newCell = newRow.insertCell(0);
+    var newText = document.createTextNode(player.pid);
+    newCell.appendChild(newText);
+    
+    newCell = newRow.insertCell(1);
+    newText = document.createTextNode(player.firstName);
+    newCell.appendChild(newText);
+    
+    newCell = newRow.insertCell(2);
+    newText = document.createTextNode(player.lastName);
+    newCell.appendChild(newText);
+    
+    newCell = newRow.insertCell(3);
+    newText = document.createTextNode(player.birthDate);
+    newCell.appendChild(newText);
+    
+    newCell = newRow.insertCell(4);
+    newText = document.createTextNode(player.ageGroup);
+    newCell.appendChild(newText);
+}
+/** Checks the date to determine the age division
+    TODO analyse date */
+var getAgeDivision = function(date){
+    // return "Junior";
+    // return "Senior";
+    return "Master";
+}
 
+// Transition methods
 /** Event fired when a player is added to the tournament
     using the add form. */
 var addFormPlayer = function(evt){
@@ -31,34 +68,11 @@ var addFormPlayer = function(evt){
         addForm.querySelector('#first_name').value,
         addForm.querySelector('#last_name').value,
         addForm.querySelector('#birth_date').value);
-    var known = document.querySelector('#known tbody');
-    var registered = document.querySelector('#registered tbody');
-    var newRow = registered.insertRow(registered.rows.length);
     
-    var newCell = newRow.insertCell(0); // TODO better insertion
-    var newText = document.createTextNode(newPlayer.pid);
-    newCell.appendChild(newText);
-    
-    newCell = newRow.insertCell(1);
-    newText = document.createTextNode(newPlayer.firstName);
-    newCell.appendChild(newText);
-    
-    newCell = newRow.insertCell(2);
-    newText = document.createTextNode(newPlayer.lastName);
-    newCell.appendChild(newText);
-    
-    newCell = newRow.insertCell(3);
-    newText = document.createTextNode(newPlayer.birthDate);
-    newCell.appendChild(newText);
-    
-    newCell = newRow.insertCell(4);
-    newText = document.createTextNode(newPlayer.ageGroup);
-    newCell.appendChild(newText);
-    
+    addPlayer(newPlayer,'#registered');
     // TODO check if the player isn't already known
     // TODO add player to xml
-    var copyRow = newRow.cloneNode(true);
-    known.appendChild(copyRow);
+    addPlayer(newPlayer, '#known');
     
     // Clean out the add form
     setTimeout(function(){addForm.reset();},50);
@@ -70,18 +84,24 @@ var playerRegSelect = function(elt){
         elt.className+=' selected';
     }
 }
-// TODO analyse date
-var getAgeDivision = function(date){
-    // return "Junior";
-    // return "Senior";
-    return "Master";
-}
-// Transition methods
 
-
+/** Event fired when the first view is done. */
 var idToPlayers = function(evt){
     document.querySelector('#add_players').style.display="block";
     document.querySelector('#home').style.display="none";
+    
+    // Loads the players stored in the data/players.xml file
+    var playersXml = loadXMLDoc('data/players.xml');
+    var players = playersXml.querySelectorAll('player');
+    console.log(players+" of size "+players.length);
+    for(var i=0;i<players.length;i++){
+        console.log('loading player '+i+'/'+players.length);
+        var p = new Player(players[i].getAttribute('userid'),
+                           players[i].querySelector('firstname').innerHTML,
+                           players[i].querySelector('lastname').innerHTML,
+                           players[i].querySelector('birthdate').innerHTML);
+        addPlayer(p,'#known');
+    }
 }
 // Event handlers
 document.querySelector('#id_form').action="javascript:void(0);";
