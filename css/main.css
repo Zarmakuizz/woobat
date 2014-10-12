@@ -52,6 +52,11 @@ header p{
     color: #FFFFFF;
     background: none repeat scroll 0% 0% #1F8DD6;
 }
+.danger{
+    border-color: #C9302C;
+    color: #FFFFFF;
+    background: none repeat scroll 0% 0% #C9302C;
+}
 
 #add_players, #check, #tournament{
     display:none;
@@ -65,6 +70,22 @@ header p{
     width:95%;
     vertical-align:top;
 }
+
+.selected{
+    background-color:#BBBBBB;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 @font-face {
   font-family: "myriad-pro";

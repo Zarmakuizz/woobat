@@ -40,6 +40,13 @@ var addFormPlayer = function(evt){
     
     setTimeout(function(){addForm.reset();},50);
 }
+var playerRegSelect = function(elt){
+    if(elt.className.contains('selected')){
+        elt.className = elt.className.replace('selected','');
+    }else{
+        elt.className+=' selected';
+    }
+}
 // TODO analyse date
 var getAgeDivision = function(date){
     // return "Junior";
