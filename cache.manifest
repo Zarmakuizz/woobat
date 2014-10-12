@@ -1,8 +1,0 @@
-CACHE MANIFEST
-
-NETWORK:
-/cache.manifest
-CACHE:
-img/*
-data/*
-css/*
