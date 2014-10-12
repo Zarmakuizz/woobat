@@ -14,6 +14,9 @@
         <!-- div with contents when arriving on the app. Here you setup and are going to start a tournament. -->
         <div id="home" class="grid grid-pad">
             <h2>First, we need to initialize the tournament with important informations.</h2>
+            <h3>Or you might as well load an already existing tournament file, it's up to you.</h3>
+            <p>INCOMING!</p>
+            <p>[file selector]<a class="button small ok">Load</a> ← currently does nothing.</p>
             <h3>Fields with a * are mandatory.</h3>
             <form name="id_form" id="id_form">
             <!-- Organizer's POP ID *, Tournament ID*-->
@@ -40,28 +43,33 @@
         </div>
         <!-- div with contents to manage players: add/edit/remove players -->
         <div id="add_players" class="grid grid-pad">
+            <!-- Form that disappears, then letting other forms alive-->
+            <form name="disappears"></form>
             <!-- load players from cached database, or offer a button to load them from TOM -->
             <!-- Area to display known players with add and filtering -->
             <h2>Now, let's add some players to the tournament.</h2>
-            <h3>This is the list of players from previous events.</h3>
-            <table id="known" class="col-1-1">
-                <thead>
-                    <th>Player id</th>
-                    <th>First name</th>
-                    <th>Last name</th>
-                    <th>Birth date</th>
-                    <th>Age division</th>
-                </thead>
-                <tbody>
-                </tbody>
-                <tfoot>
-                    <th colspan="5">To edit or remove a player, select the player's line, then click on <a class="button small ok">Edit</a> or <a class="button small danger">Remove</a>.</th>
-                </tfoot>
-            </table>
+            <div id="previously_known" class="col-1-1">
+                <h3>This is the list of known players from previous events.</h3><p><a class="button small ok" id="load_players_xml">Load a players.xml file</a> to get more players from your existing TOM, or <a class="button small ok">Save the actual list</a>.</p>
+                <form name="secret_load_players_xml" id="secret_load_players_xml" style="display:none;">
+                    <input type="file" name="xml_file" id="lpx_input"/>
+                </form>
+                <table id="known" class="col-1-1">
+                    <thead>
+                        <th>Player id</th>
+                        <th>First name</th>
+                        <th>Last name</th>
+                        <th>Birth date</th>
+                        <th>Age division</th>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <th colspan="5">To edit or remove a player, select the player's line, then click on <a class="button small ok">Edit</a> or <a class="button small danger">Remove</a>.</th>
+                    </tfoot>
+                </table>
+            </div>
             <!-- Area to display participating players with add and filtering-->
             <h3>Add a new player to the tournament</h3>
-            <!-- Form that disappears, then letting add_player_form alive-->
-            <form name="disappears"></form>
             <form name="add_player_form" id="add_player_form">
                 <div class="col-1-6">
                     <label for="pid">Player id</label>
@@ -77,98 +85,30 @@
                 </div>
                 <div class="col-1-6">
                     <label for="birth_date">Birth Date</label>
-                    <input type="text" id="birth_date" name="birth_date"  size="10" required/>
+                    <input type="text" id="birth_date" name="birth_date"  size="10" required placeholder="MM/DD/YYYY"/>
                 </div>
                 <div class="col-1-6">
                     <input type="submit" name="add_form_submit" id="add_form_submit" value="Add the player" class="button ok" style="display:block !important;">
                     <label for="id_form_submit" style="visibility:hidden;">a</label>
                 </div>
             </form>
-            <h3 class="col-1-1">This is the list of players in the current event.</h3>
-            <table id="registered" class="col-1-1">
-                <thead>
-                    <th>Player id</th>
-                    <th>First name</th>
-                    <th>Last name</th>
-                    <th>Birth date</th>
-                    <th>Age division</th>
-                </thead>
-                <tbody>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123450</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123451</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123452</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123453</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123454</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123455</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123456</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123457</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123458</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                    <tr onclick="playerRegSelect(this);">
-                        <td>123459</td>
-                        <td>Jean-Pierre</td>
-                        <td>Rastapopoulos</td>
-                        <td>02/02/1982</td>
-                        <td>Master</td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <th colspan="5">To edit a player, </th>
-                </tfoot>
-            </table>
+            <div id="registered_div" class="col-1-1">
+                <h3 class="col-1-1">This is the list of players in the current event.</h3>
+                <table id="registered" class="col-1-1">
+                    <thead>
+                        <th>Player id</th>
+                        <th>First name</th>
+                        <th>Last name</th>
+                        <th>Birth date</th>
+                        <th>Age division</th>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <th colspan="5">There are currently <span id="reg_total">0</span> players:  <span id="reg_junior">0</span> Juniors, <span id="reg_senior">0</span> Seniors and <span id="reg_master">0 Masters.</th>
+                    </tfoot>
+                </table>
+            </div>
         </div>
         <!-- div to recap and some options related to tournament choices -->
         <div id="check">

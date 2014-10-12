@@ -8,15 +8,22 @@ function Player(pid, firstName, lastName, birthDate) {
     this.ageGroup = getAgeDivision(birthDate);
     // TODO add pairing management
 }
+/** Takes a table line and makes it into a player */
+var trToPlayer = function(tr){
+    console.log(tr);
+    var tds = tr.querySelectorAll('td');
+    // TODO defensive programing
+    return new Player(tds[0].innerHTML,tds[1].innerHTML,
+                      tds[2].innerHTML,tds[3].innerHTML);
+}
 
-/** Add a player to a list of players.
-    @param player a Player object. 
-    @param id The id to the list of players. Currently supported are #known and #registered.*/
-var addPlayer = function(player, id){
-    // TODO defensive programming
+/** Add a player to a list of players.     @param player a Player object.
+@param id The id to the list of players. Currently supported are #known and
+#registered.*/ 
+var addPlayer = function(player, id, event){
+    // TODO defensive programming     v
     var target = document.querySelector(id+' tbody');
-    var newRow = target.insertRow(target.rows.length);
-    // TODO improve insertion. Or offer some auto-filtering somewhere.
+    var newRow = document.createElement('tr');
     
     var newCell = newRow.insertCell(0);
     var newText = document.createTextNode(player.pid);
@@ -37,6 +44,14 @@ var addPlayer = function(player, id){
     newCell = newRow.insertCell(4);
     newText = document.createTextNode(player.ageGroup);
     newCell.appendChild(newText);
+    
+    target.appendChild(newRow);
+    // TODO improve insertion. Or offer some auto-filtering somewhere.
+    // Add event if any
+    if(event != undefined && event != ""){
+        newRow.addEventListener('click',event);
+        newRow.addEventListener('touchend',event);
+    }
 }
 /** Checks the date to determine the age division
     TODO analyse date */
@@ -46,20 +61,42 @@ var getAgeDivision = function(date){
     return "Master";
 }
 
-// Transition methods
-/** Event fired when a player is added to the tournament
-    using the add form. */
-var addFormPlayer = function(evt){
-    // Check if the form has some empty values or incorrect ones
-    var addForm = document.querySelector('#add_player_form');
-    var allInputs = addForm.querySelectorAll('input');
+// Transition methods 
+/** Select a file when clicking on "load players.xml" */
+var loadPlayerFile = function(evt){
+    document.querySelector('#lpx_input').click();
+} /** Import list of players */
+var importPlayers = function(evt){
+    console.log(evt);     
+    var xmlFile = evt.target.files[0];
+    var reader = new FileReader();
+    reader.onloadend = function(){
+        var strContent = this.result;
+        var parsed = new DOMParser().parseFromString(strContent, "text/xml");
+        var players = parsed.querySelectorAll('player');
+        for(var i=0; i<players.length; i++){
+            var p = new Player(players[i].getAttribute('userid'),
+            players[i].querySelector('firstname').innerHTML,
+            players[i].querySelector('lastname').innerHTML,
+            players[i].querySelector('birthdate').innerHTML);
+            addPlayer(p,'#known',playerKnownSelect);         
+        }
+    }
+    reader.readAsText(xmlFile); 
+} 
+/** Event fired when a player is added to the
+tournament     using the add form. */ 
+var addFormPlayer = function(evt){     
+    //Check if the form has some empty values or incorrect ones     
+    var addForm = document.querySelector('#add_player_form');     
+    var allInputs = addForm.querySelectorAll('input');     
     if(allInputs[0].value === "" || isNaN(parseInt(allInputs[0].value))){
         allInputs[0].value = "";
         return;
-    }
+    }     
     if(allInputs[1].value === ""){return;}
-    if(allInputs[2].value === ""){return;}
-    if(allInputs[3].value === ""){return;}
+    if(allInputs[2].value === ""){return;} 
+    if(allInputs[3].value === ""){return;}     
     // TODO check pid and birth_date values
 
     // Here it seems that all field have been provided with value
@@ -72,10 +109,17 @@ var addFormPlayer = function(evt){
     addPlayer(newPlayer,'#registered');
     // TODO check if the player isn't already known
     // TODO add player to xml
-    addPlayer(newPlayer, '#known');
+    addPlayer(newPlayer, '#known',playerKnownSelect);
     
     // Clean out the add form
     setTimeout(function(){addForm.reset();},50);
+}
+var playerKnownSelect = function(elt){
+    console.log("elt.target.nodeName = "+elt.target.nodeName);
+    var tr = (elt.target.nodeName.toLowerCase() === "td" ?
+                        elt.target.parentNode : elt.target);
+    var player = trToPlayer(tr);
+    addPlayer(player,'#registered');
 }
 var playerRegSelect = function(elt){
     if(elt.className.contains('selected')){
@@ -90,24 +134,28 @@ var idToPlayers = function(evt){
     document.querySelector('#add_players').style.display="block";
     document.querySelector('#home').style.display="none";
     
+    /** TODO load from user's given file
     // Loads the players stored in the data/players.xml file
     var playersXml = loadXMLDoc('data/players.xml');
     var players = playersXml.querySelectorAll('player');
-    console.log(players+" of size "+players.length);
     for(var i=0;i<players.length;i++){
-        console.log('loading player '+i+'/'+players.length);
         var p = new Player(players[i].getAttribute('userid'),
                            players[i].querySelector('firstname').innerHTML,
                            players[i].querySelector('lastname').innerHTML,
                            players[i].querySelector('birthdate').innerHTML);
-        addPlayer(p,'#known');
+        addPlayer(p,'#known',playerKnownSelect);
     }
+    //*/
 }
 // Event handlers
 document.querySelector('#id_form').action="javascript:void(0);";
 document.querySelector('#id_form_submit').addEventListener('click', idToPlayers);
 document.querySelector('#id_form_submit').addEventListener('touchend', idToPlayers);
 
+document.querySelector('#secret_load_players_xml').action="javascript:void(0);";
+document.querySelector('#lpx_input').addEventListener('change', importPlayers);
+document.querySelector('#load_players_xml').addEventListener('click',loadPlayerFile);
+document.querySelector('#load_players_xml').addEventListener('touchend',loadPlayerFile);
 document.querySelector('#add_player_form').action="javascript:void(0);";
 document.querySelector('#add_form_submit').addEventListener('click', addFormPlayer);
 document.querySelector('#add_form_submit').addEventListener('touchend', addFormPlayer);
