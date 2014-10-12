@@ -24,6 +24,7 @@ PRIORITY
 * Swiss Round pairing algorithm (with age groups and ties)
 * Tops after Swiss rounds consisting of either Single Elimination finals or more rounds + Single Eliminations
 * View to display pairings and enter tournament results
+* Defensive programming
 * Export finished tournament as a tdf
 
 SECONDARY

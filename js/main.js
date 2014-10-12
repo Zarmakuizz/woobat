@@ -7,14 +7,14 @@ function Player(pid, firstName, lastName, birthDate) {
     this.birthDate = birthDate; // TODO manage date
     this.ageGroup = getAgeDivision(birthDate);
     // TODO add pairing management
-}
+};
 /** Takes a table line and makes it into a player */
 var trToPlayer = function(tr){
     var tds = tr.querySelectorAll('td');
     // TODO defensive programing
     return new Player(tds[0].innerHTML,tds[1].innerHTML,
                       tds[2].innerHTML,tds[3].innerHTML);
-}
+};
 
 /** Add a player to a list of players.     @param player a Player object.
 @param id The id to the list of players. Currently supported are #known and
@@ -51,26 +51,27 @@ var addPlayer = function(player, id, event){
         newRow.addEventListener('click',event);
         newRow.addEventListener('touchend',event);
     }
-}
+};
 /** Checks the date to determine the age division
     TODO analyse date */
 var getAgeDivision = function(date){
     // return "Junior";
     // return "Senior";
     return "Master";
-}
+};
 
 // Transition methods 
 /** Select a file when clicking on "load players.xml" */
 var loadPlayerFile = function(evt){
     document.querySelector('#lpx_input').click();
-} /** Import list of players */
+}; /** Import list of players */
 var importPlayers = function(evt){
     console.log(evt);     
     var xmlFile = evt.target.files[0];
     var reader = new FileReader();
     reader.onloadend = function(){
         var strContent = this.result;
+        // TODO defensive programming
         var parsed = new DOMParser().parseFromString(strContent, "text/xml");
         var players = parsed.querySelectorAll('player');
         for(var i=0; i<players.length; i++){
@@ -82,7 +83,7 @@ var importPlayers = function(evt){
         }
     }
     reader.readAsText(xmlFile); 
-} 
+}; 
 /** Export list of players following the syntax in data/players.xml */
 var exportPlayers = function(evt){
     var playersTr = document.querySelectorAll('#known tbody tr');
@@ -106,7 +107,7 @@ var exportPlayers = function(evt){
     pom.setAttribute('download','players.xml');
     pom.click();
 
-}
+};
 /** Event fired when a player is added to the
 tournament     using the add form. */ 
 var addFormPlayer = function(evt){     
@@ -136,21 +137,21 @@ var addFormPlayer = function(evt){
     
     // Clean out the add form
     setTimeout(function(){addForm.reset();},50);
-}
+};
 var playerKnownSelect = function(elt){
     console.log("elt.target.nodeName = "+elt.target.nodeName);
     var tr = (elt.target.nodeName.toLowerCase() === "td" ?
                         elt.target.parentNode : elt.target);
     var player = trToPlayer(tr);
     addPlayer(player,'#registered');
-}
+};
 var playerRegSelect = function(elt){
     if(elt.className.contains('selected')){
         elt.className = elt.className.replace('selected','');
     }else{
         elt.className+=' selected';
     }
-}
+};
 
 /** Event fired when the first view is done. */
 var idToPlayers = function(evt){
@@ -169,7 +170,7 @@ var idToPlayers = function(evt){
         addPlayer(p,'#known',playerKnownSelect);
     }
     //*/
-}
+};
 // Event handlers
 document.querySelector('#id_form').action="javascript:void(0);";
 document.querySelector('#id_form_submit').addEventListener('click', idToPlayers);
