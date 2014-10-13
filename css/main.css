@@ -55,13 +55,18 @@ header p{
     color: #FFFFFF;
     background: none repeat scroll 0% 0% #1F8DD6;
 }
+.inactive{
+    border-color: #333333;
+    color: #FFFFFF;
+    background: none repeat scroll 0% 0% #333333;
+}
 .danger{
     border-color: #C9302C;
     color: #FFFFFF;
     background: none repeat scroll 0% 0% #C9302C;
 }
 
-#add_players, #check, #tournament{
+#add_players, #recap, #tournament{
     display:none;
 }
 #add_player_form{
@@ -82,7 +87,7 @@ header p{
     overflow-y:auto;
 }
 #registered_div{
-    height:400px;
+    max-height:400px;
     overflow-y:auto;
 }
 

@@ -52,6 +52,22 @@ var addPlayer = function(player, id, event){
         newRow.addEventListener('touchend',event);
     }
 };
+var addRegPlayer = function(player){
+    console.log(player+"; "+player.ageGroup.toLowerCase());
+    var totalPlayers = document.querySelector('#reg_total').innerHTML;
+    document.querySelector('#reg_total').innerHTML = parseInt(totalPlayers)+1;
+    if(parseInt(totalPlayers)+1 >= 8){
+        document.querySelector('#players_to_recap').setAttribute('class','button ok');
+        document.querySelector('#players_to_recap').innerHTML = "End registrations";
+        document.querySelector('#players_to_recap').addEventListener('click', playersToRecap);
+    }
+    var totalAge = document.querySelector('#reg_'+player.ageGroup.toLowerCase()).innerHTML;
+    document.querySelector('#reg_'+player.ageGroup.toLowerCase()).innerHTML = parseInt(totalAge)+1;
+    addPlayer(player,'#registered');
+};
+var addKnownPlayer = function(player){
+    addPlayer(player,'#known',playerKnownSelect);
+};
 /** Checks the date to determine the age division.
     Age division is based solely on birthdate's year.
     However, around July 15th (enough days after US nationals), every 
@@ -95,7 +111,7 @@ var importPlayers = function(evt){
             players[i].querySelector('lastname').innerHTML,
             players[i].querySelector('birthdate').innerHTML);
             // TODO Check userid and birthdate
-            addPlayer(p,'#known',playerKnownSelect);         
+            addKnownPlayer(p);         
         }
     }
     reader.readAsText(xmlFile); 
@@ -164,21 +180,20 @@ var addFormPlayer = function(evt){
         allInputs[1].value,  /* #first_name */
         allInputs[2].value,  /* #last_name */
         allInputs[3].value); /* #birth_date */
-    
-    addPlayer(newPlayer,'#registered');
+    // TODO check if the player's id matches the tournament organizer's id
+    // TODO check if the player isn't already registered
+    addRegPlayer(newPlayer);
     // TODO check if the player isn't already known
-    // TODO add player to xml
-    addPlayer(newPlayer, '#known',playerKnownSelect);
+    addKnownPlayer(newPlayer);
     
     // Clean out the add form
     setTimeout(function(){addForm.reset();},50);
 };
 var playerKnownSelect = function(elt){
-    console.log("elt.target.nodeName = "+elt.target.nodeName);
     var tr = (elt.target.nodeName.toLowerCase() === "td" ?
                         elt.target.parentNode : elt.target);
     var player = trToPlayer(tr);
-    addPlayer(player,'#registered');
+    addRegPlayer(player);
 };
 var playerRegSelect = function(elt){
     if(elt.className.contains('selected')){
@@ -205,6 +220,10 @@ var idToPlayers = function(evt){
     document.querySelector('#add_players').style.display="block";
     document.querySelector('#home').style.display="none";
 };
+var playersToRecap = function(evt){
+    document.querySelector('#recap').style.display="block";
+    document.querySelector('#add_players').style.display="none";
+}
 // Event handlers
 document.querySelector('#id_form').action="javascript:void(0);";
 document.querySelector('#id_form_submit').addEventListener('click', idToPlayers);
