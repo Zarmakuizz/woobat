@@ -52,12 +52,27 @@ var addPlayer = function(player, id, event){
         newRow.addEventListener('touchend',event);
     }
 };
-/** Checks the date to determine the age division
-    TODO analyse date */
+/** Checks the date to determine the age division.
+    Age division is based solely on birthdate's year.
+    However, around July 15th (enough days after US nationals), every 
+    categories are redefined (because kids grow eventually).
+    The exception being the World Championships. If this webapp is ever
+    used for World Championships, just modify this function to set the
+    limit date to after September 1st.
+    @param date The date to check.
+    TODO defensive programming? */
 var getAgeDivision = function(date){
-    // return "Junior";
-    // return "Senior";
-    return "Master";
+    // TODO defensive programming?
+    var year = parseInt(date.match(/\d+/g)[2]);
+    var today = new Date();
+    var dayToday = today.getDate();
+    var monthToday = today.getMonth()+1;
+    var yearToday = today.getFullYear();
+    var leap = (monthToday>7 || (dayToday>=15 && monthToday ==7) ? 0 : 1);
+    var age = yearToday - year + leap; // 
+    if(age <= 10){ return 'Junior';}
+    if(age >=11 && age <= 14){ return 'Senior';}
+    return 'Master';
 };
 
 // Transition methods 
@@ -79,6 +94,7 @@ var importPlayers = function(evt){
             players[i].querySelector('firstname').innerHTML,
             players[i].querySelector('lastname').innerHTML,
             players[i].querySelector('birthdate').innerHTML);
+            // TODO Check userid and birthdate
             addPlayer(p,'#known',playerKnownSelect);         
         }
     }
@@ -113,22 +129,41 @@ tournament     using the add form. */
 var addFormPlayer = function(evt){     
     //Check if the form has some empty values or incorrect ones     
     var addForm = document.querySelector('#add_player_form');     
-    var allInputs = addForm.querySelectorAll('input');     
+    var allInputs = addForm.querySelectorAll('input');    
+    /* #pid */ 
     if(allInputs[0].value === "" || isNaN(parseInt(allInputs[0].value))){
         allInputs[0].value = "";
         return;
-    }     
-    if(allInputs[1].value === ""){return;}
-    if(allInputs[2].value === ""){return;} 
-    if(allInputs[3].value === ""){return;}     
-    // TODO check pid and birth_date values
+    }
+    if(allInputs[1].value === ""){return;} /* #first_name */
+    if(allInputs[2].value === ""){return;} /* #last_name */
+    /* #birth_date */
+    if(allInputs[3].value === "" ||
+        !allInputs[3].value.match(/^\d{1,2}\D?\d{1,2}\D?\d{4}$/g)){
+        allInputs[3].value = "";
+        return;
+    }else{ // We need to go deeper at checking a date
+        // The value matches the regex above, so we get 3 strings of digits
+        var raw = allInputs[3].value.match(/\d+/g);
+        var date = [parseInt(raw[0]),parseInt(raw[1]),parseInt([raw2])];
+        // wrong month and day
+        if(date[0] > 12 && date[1] > 12){return;}
+        // days are the 1st argument - as things should be, but aren't in Murica
+        if(date[0] > 12 && date[1] <=12){
+            date = date.swapItems(0,1);
+        }
+        // Let's rebuild the raw before formatting the date
+        raw[0] = pad(day[0],2);
+        raw[1] = pad(day[1],2);
+        allInputs[3].value = raw[0]+"/"+raw[1]+"/"+raw[2];
+    }
 
     // Here it seems that all field have been provided with value
     var newPlayer = new Player(
-        addForm.querySelector('#pid').value,
-        addForm.querySelector('#first_name').value,
-        addForm.querySelector('#last_name').value,
-        addForm.querySelector('#birth_date').value);
+        allInputs[0].value,  /* #pid */
+        allInputs[1].value,  /* #first_name */
+        allInputs[2].value,  /* #last_name */
+        allInputs[3].value); /* #birth_date */
     
     addPlayer(newPlayer,'#registered');
     // TODO check if the player isn't already known
@@ -155,21 +190,20 @@ var playerRegSelect = function(elt){
 
 /** Event fired when the first view is done. */
 var idToPlayers = function(evt){
+    var initForm = document.querySelector('#id_form');
+    var toID = initForm.querySelector('#to_id').value;
+    var tournyId = initForm.querySelector('#tourny_id').value;
+    // TODO others
+    // TODO validity checks
+    if(toID == "" || isNaN(parseInt(toID)) ){
+        return false;
+    }else if(tournyId == "" || !tournyId.match(/^\d{2}-\d{2}-\d{6}$/g)){
+        return false; // Currently tournaments ID look like 00-00-000000
+    }
+    // All checks are well done
+    // TODO update a global object maybe?
     document.querySelector('#add_players').style.display="block";
     document.querySelector('#home').style.display="none";
-    
-    /** TODO load from user's given file
-    // Loads the players stored in the data/players.xml file
-    var playersXml = loadXMLDoc('data/players.xml');
-    var players = playersXml.querySelectorAll('player');
-    for(var i=0;i<players.length;i++){
-        var p = new Player(players[i].getAttribute('userid'),
-                           players[i].querySelector('firstname').innerHTML,
-                           players[i].querySelector('lastname').innerHTML,
-                           players[i].querySelector('birthdate').innerHTML);
-        addPlayer(p,'#known',playerKnownSelect);
-    }
-    //*/
 };
 // Event handlers
 document.querySelector('#id_form').action="javascript:void(0);";

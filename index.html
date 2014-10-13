@@ -13,7 +13,7 @@
         </header>
         <!-- div with contents when arriving on the app. Here you setup and are going to start a tournament. -->
         <div id="home" class="grid grid-pad">
-            <h2>First, we need to initialize the tournament with important informations.</h2>
+            <h2>First, we need to initialize the tournament.</h2>
             <h3>If you wish to continue an already started tournament, just load the tdf file instead.</h3>
             <p>INCOMING!</p>
             <p><a class="button small ok">Load</a> ← currently does nothing.</p>
@@ -22,10 +22,10 @@
             <form name="id_form" id="id_form">
             <!-- Organizer's POP ID *, Tournament ID*-->
                 <label for="to_id" class="col-3-12" title="The P!ID, which you could use as a player for some tournaments, is required in order to upload the tournament on Pokemon.com.">Your Player ID *</label>
-                <input type="text" name="to_id" id="to_id" class="col-3-12"/>
+                <input type="text" name="to_id" id="to_id" class="col-3-12" required/>
                 <p class="col-6-12"></p>
                 <label for="tourny_id" class="col-3-12" title="The tournament ID, if your tournament is sanctioned on Pokemon.com, is required in order to upload the tournament on Pokemon.com. If this is an unofficial tournament, feel free to insert a garbage value instead (as long as it looks like a real tournament id).">Tournament ID *</label>
-                <input type="text" name="tourny_id" id="tourny_id" placeholder="##-##-######" class="col-3-12"/>
+                <input type="text" name="tourny_id" id="tourny_id" placeholder="##-##-######" class="col-3-12" required/>
                 <p class="col-6-12"></p>
             <!-- Name, City* , State, Country* -->
                 <label for="tourny_name" class="col-1-4" title="Give a name to your tournament. For example: Regional Arizona, European Challenge Cup, etc">Tournament name</label>
