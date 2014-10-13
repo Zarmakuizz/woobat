@@ -19,7 +19,7 @@ TODO List
 PRIORITY
 * Initiate tournament - WIP
 * Register players - WIP
-* Resume initiation before starting tournament - SOON
+* Resume initiation before starting tournament - WIP
 * Single Elimination pairing algorithm (with age groups)
 * Swiss Round pairing algorithm (with age groups and ties)
 * Tops after Swiss rounds consisting of either Single Elimination finals or more rounds + Single Eliminations
