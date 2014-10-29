@@ -11,6 +11,9 @@ input:required{
 th{
     text-align:left;
 }
+ul{
+    list-style-type: none;
+}
 header{
     width:100%;
     background-color:#333333;

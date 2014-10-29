@@ -91,7 +91,7 @@
                 </div>
                 <div class="col-1-6">
                     <input type="submit" name="add_form_submit" id="add_form_submit" value="Add the player" class="button ok" style="display:block !important;">
-                    <label for="id_form_submit" style="visibility:hidden;">a</label>
+                    <label for="add_form_submit" style="visibility:hidden;">a</label>
                 </div>
             </form>
             <div id="registered_div" class="col-1-1">
@@ -116,6 +116,59 @@
         <!-- div to recap and some options related to tournament choices -->
         <div id="recap">
             <!-- round time, number of swiss, size of top for each category (if swiss), top round time, small final -->
+            <h2>Last step before starting! We have a few details to check.</h2>
+            <form name="pairing_system" id="pairing_system">
+                <ul>
+                    <li class="col-1-1">
+                        Choose the pairing system
+                        <input type="radio" name="pairing_primary" value="swiss" id="radio_swiss"/><label for="radio_swiss">Swiss rounds</label>
+                        <input type="radio" name="pairing_primary" value="single" id="radio_single" /><label for="radio_single">Single Elimination</label>
+                    </li>
+                    <li class="col-1-1">
+                        Run tops for Swiss rounds?
+                        <input type="radio" name="pairing_top" value="true" id="pairing_top_yes" disabled/><label for="pairing_top_yes">Yes</label>
+                        <input type="radio" name="pairing_top" value="false" id="pairing_top_no" disabled/><label for="pairing_top_no">No</label>
+                    </li>
+                    <li class="col-1-1">
+                        Play the match between the 3rd and 4th? (Single Elimination and tops only)
+                        <input type="radio" name="small_final" id="small_final_yes" value="true" disabled/><label for="small_final_yes">Yes</label>
+                        <input type="radio" name="small_final" id="small_final_no" value="false"  checked="checked" disabled/><label for="small_final_no">No</label>
+                    </li>
+                    <!--
+                    <li class="col-1-1">
+                        Run as a day 2 event (with more rounds for top players) if available?
+                        <input type="radio" name="day2" id="day2_yes" value="true" checked="checked" disabled/><label for="day2_yes">Yes</label>
+                        <input type="radio" name="day2" id="day2_no" value="false" disabled/><label for="day2_no">No</label>
+                    </li>
+                    -->
+                    <li class="col-1-1">
+                        Run one swiss round less due to tops?
+                        <input type="radio" name="less_round" id="less_round_yes" value="true" checked="checked" disabled/><label for="less_round_yes">Yes</label>
+                        <input type="radio" name="less_round" id="less_round_no" value="false" disabled/><label for="less_round_no">No</label>
+                    </li>
+                </ul>
+                <ul id="divisions_recap"><!-- Following lines might be hidden,
+                depending if a core age division has enough players -->
+                    <li><!-- Juniors -->
+                        <span>0</span> Juniors will play <input name="recap_junior" type="number" value="0" /> rounds.
+                    </li>
+                    <li><!-- Seniors -->
+                        <span>0</span> Seniors will play <input name="recap_senior" type="number" value="0" /> rounds.
+                    </li>
+                    <li><!-- Juniors & Seniors -->
+                        A mixed group of <span>0</span> Juniors and Seniors will play <input name="recap_js" type="number" value="0" /> rounds.
+                    </li>
+                    <li><!-- Masters -->
+                        <span>0</span> Masters will play <input name="recap_master" type="number" value="0" /> rounds.
+                    </li>
+                    <li><!-- Seniors & Masters-->
+                        A mixed group of <span>0</span> Seniors and Masters will play <input name="recap_sm" type="number" value="0" /> rounds.
+                    </li>
+                    <li><!-- Juniors & Seniors & Masters -->
+                        A mixed group of <span>0</span> Juniors, Seniors and Masters will play <input name="recap_jsm" type="number" value="0" /> rounds.
+                    </li>
+
+            </form>
             <!-- players recap -->
         </div>
             <!-- main UI when tournament is in progress - display current pairings -->
