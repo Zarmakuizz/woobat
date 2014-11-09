@@ -16,182 +16,277 @@ var trToPlayer = function(tr){
                       tds[2].innerHTML,tds[3].innerHTML);
 };
 
-/** Add a player to a list of players.     @param player a Player object.
-@param id The id to the list of players. Currently supported are #known and
-#registered.*/ 
-var addPlayer = function(player, id, event){
-    // TODO defensive programming     v
-    var target = document.querySelector(id+' tbody');
-    var newRow = document.createElement('tr');
-    
-    var newCell = newRow.insertCell(0);
-    var newText = document.createTextNode(player.pid);
-    newCell.appendChild(newText);
-    
-    newCell = newRow.insertCell(1);
-    newText = document.createTextNode(player.firstName);
-    newCell.appendChild(newText);
-    
-    newCell = newRow.insertCell(2);
-    newText = document.createTextNode(player.lastName);
-    newCell.appendChild(newText);
-    
-    newCell = newRow.insertCell(3);
-    newText = document.createTextNode(player.birthDate);
-    newCell.appendChild(newText);
-    
-    newCell = newRow.insertCell(4);
-    newText = document.createTextNode(player.ageGroup);
-    newCell.appendChild(newText);
-    
-    target.appendChild(newRow);
-    // TODO improve insertion. Or offer some auto-filtering somewhere.
-    // Add event if any
-    if(event != undefined && event != ""){
-        newRow.addEventListener('click',event);
-        newRow.addEventListener('touchend',event);
-    }
-};
+
 var addRegPlayer = function(player){
-    var totalPlayers = document.querySelector('#reg_total').innerHTML;
-    document.querySelector('#reg_total').innerHTML = parseInt(totalPlayers)+1;
-    if(parseInt(totalPlayers)+1 >= 8){
+    RegisteredList.addPlayer(player);
+    var totalPlayers = RegisteredList.getTotalPlayers();
+    if(totalPlayers >= 8){
         document.querySelector('#players_to_recap').setAttribute('class','button ok');
         document.querySelector('#players_to_recap').innerHTML = "End registrations";
         document.querySelector('#players_to_recap').addEventListener('click', playersToRecap);
     }
-    var totalAge = document.querySelector('#reg_'+player.ageGroup.toLowerCase()).innerHTML;
-    document.querySelector('#reg_'+player.ageGroup.toLowerCase()).innerHTML = parseInt(totalAge)+1;
-    addPlayer(player,'#registered');
+    document.querySelector('#reg_total').innerHTML = totalPlayers;
+    document.querySelector('#reg_junior').innerHTML = RegisteredList.getTotalPerGroup()[0];
+    document.querySelector('#reg_senior').innerHTML = RegisteredList.getTotalPerGroup()[1];
+    document.querySelector('#reg_master').innerHTML = RegisteredList.getTotalPerGroup()[2];
 };
 var addKnownPlayer = function(player){
-    addPlayer(player,'#known',playerKnownSelect);
+    KnownList.addPlayer(player);
 };
 
+/** Class representing a list of players. May be used for both
+    known players or registered players. 
+    @param source The queryselector pointing the tbody to fill */
+function PlayerList(source){
+    var players = [];
+    var evt = null;
+    var view = document.querySelector(source);
+    /** Adds a player to the player's list.
+        @param player a Player object
+        @returns true if insertion has been successful, false if a player with the same ID was already there */
+    function addP(player){
+        for(var i=0;i<players.length;i++){
+            if(player.pid == players[i].pid){ return false};
+        }
+        players.push(player);
+        sortP('pid');
+        return true;
+    }
+    /** Removes a player to the player's list.
+        @param player a Player object
+        @returns true if deletion has been successful, false if the player wasn't in the list */
+    function rmP(player){
+        var id = players.indexOf(player);
+        if(id < 0){ return false;}
+        players.splice(id,1);
+        return true;
+    }
+    function setE(evt){
+        this.evt = evt;
+    }
+    /** Sort the player's list using a criteria.
+        Inherited methods should update their views just after a sort, if they are in charge of any view listing players.
+        @param criteria A string with one of a Player's attribute
+        */
+    function sortP(criteria){
+        switch(criteria){
+            case "firstName":
+                players.sort(function(a,b){return a.firstName.toLowerCase() < b.firstName.toLowerCase();});
+                break;
+            case "lastName":
+                players.sort(function(a,b){return a.lastName.toLowerCase() < b.lastName.toLowerCase();});
+                break;
+            case "birthDate":
+                // TODO is birthdate a Date object?
+                break;
+            case "ageGroup":
+                players.sort(function(a,b){
+                    return  (a.ageGroup == 'Junior' && b.ageGroup != 'Junior')
+                        ||  (a.ageGroup == 'Senior' && b.ageGroup == 'Master');
+                });
+            case "pid":
+            default:
+                players.sort(function(a,b){return a.pid - b.pid;});
+                break;
+        }
+    }
+    /** Import players from XML 
+        TODO */
+    function importP(){
+        // TODO
+    };
+    /** Export players for a XML file
+        TODO */
+    function exportP(){
+        // TODO
+    };
+    /** Updates the view with the current state of the list*/
+    function updateView(){
+        // Clean the view
+        while(view.firstChild){
+            view.removeChild(view.firstChild);
+        }
+        players.forEach(function(player, index, array){
+            var tr = document.createElement('tr');
+            var td = document.createElement('td');
+            td.innerHTML = player.pid;
+            tr.appendChild(td);
+            td = document.createElement('td');
+            td.innerHTML = player.firstName;
+            tr.appendChild(td);
+            td = document.createElement('td');
+            td.innerHTML = player.lastName;
+            tr.appendChild(td);
+            td = document.createElement('td');
+            td.innerHTML = player.birthDate;
+            tr.appendChild(td);
+            td = document.createElement('td');
+            td.innerHTML = player.ageGroup;
+            tr.appendChild(td);
+            //if(this.evt != null && this.evt != undefined){
+                tr.addEventListener('click', this.evt);
+                tr.addEventListener('touchend', this.evt);
+            //}
+            view.appendChild(tr);
+        });
+    };
+    return {
+        addPlayer:   function(player){ addP(player); updateView();},
+        removePlayer:function(player){ rmP(player);         updateView();},
+        setEvent:    function(evt)   { setE(evt);           updateView();},
+        sortByPid:         function(){ sortP('pid');        updateView();},
+        sortByFirstName:   function(){ sortP('firstName');  updateView();},
+        sortByLastName:    function(){ sortP('lastName');   updateView();},
+        sortByBirthDate:   function(){ sortP('birthDate');  updateView();},
+        sortByAgeGroup:    function(){ sortP('ageGroup');   updateView();},
+        getTotalPlayers:   function(){ return players.length},
+        getTotalPerGroup:  function(){ return [
+            players.filter(function(p){return p.ageGroup == 'Junior';}).length,
+            players.filter(function(p){return p.ageGroup == 'Senior';}).length,
+            players.filter(function(p){return p.ageGroup == 'Master';}).length]},
+        importPlayers:     function(){ importP();                        },
+        exportPlayers:     function(){ exportP();                        }
+    }
+};
 /** Class representing an element of the list of possible age divisions.
     AgeDivision's constructor also initializes the relevant number of rounds.
  */
-function AgeDivision(nbPlayers, roundMode, hasTops){
-    this.nbJuniors = function(){throw Error('This should have been overriden if relevant.')};
-    this.nbSeniors = function(){throw Error('This should have been overriden if relevant.')};
-    this.nbMasters = function(){throw Error('This should have been overriden if relevant.')};
-    this.nbPlayers = nbPlayers;
-    this.hasTops = hasTops;
-    AgeDivision(nbPlayers, roundMode, hasTops); // FIXME inheritance in Javascript
-    if(roundMode == "single"){
-        var i=0;
-        do{i++}while(nbPlayers/Math.pow(2,i) > 1.0);
-        this.nbRoundsTop=0;
-        this.nbRounds = i;
-        this.hasDay2 = false;
-    }else if(roundMode == "swiss"){
-        // TODO read rules
-        if(nbPlayers <= 8){
-            nbRounds = 3;
-            nbRoundsTop = 0;
+function AgeDivision(){
+    this.setup = function(nbPlayers, roundMode, hasTops){
+        if(roundMode == "single"){ hasTops == false;};
+        this.nbJuniors = function(){throw Error('This should have been overriden if relevant.')};
+        this.nbSeniors = function(){throw Error('This should have been overriden if relevant.')};
+        this.nbMasters = function(){throw Error('This should have been overriden if relevant.')};
+        this.nbPlayers = nbPlayers;
+        this.roundMode = roundMode;
+        this.hasTops = hasTops;
+        if(roundMode == "single"){
+            var i=0;
+            do{i++}while(nbPlayers/Math.pow(2,i) > 1.0);
+            this.nbRoundsTop=0;
+            this.nbRounds = i;
             this.hasDay2 = false;
-            this.day2Rounds = 0;
-        }else if(nbPlayers <= 12){
-            nbRounds = 4;
-            nbRoundsTop = (hasTops ? 2 : 0);
-            this.hasDay2 = false;
-            this.day2Rounds = 0;
-        }else if(nbPlayers <= 20){
-            nbRounds = 5;
-            nbRoundsTop = (hasTops ? 2 : 0);
-            this.hasDay2 = false;
-            this.day2Rounds = 0;
-        }else if(nbPlayers <= 32){
-            nbRounds = 5;
-            nbRoundsTop = (hasTops ? 3 : 0);
-            this.hasDay2 = false;
-            this.day2Rounds = 0;
-        }else if(nbPlayers <= 64){
-            nbRounds = 6;
-            nbRoundsTop = (hasTops ? 3 : 0);
-            this.hasDay2 = false;
-            this.day2Rounds = 0;
-        }else if(nbPlayers <= 128){
-            nbRounds = 7;
-            nbRoundsTop = (hasTops ? 3 : 0);
-            this.hasDay2 = false;
-            this.day2Rounds = 0;
-        }else if(nbPlayers <= 227){// Not sure about that number
-            nbRounds = 8;
-            nbRoundsTop = (hasTops ? 3 : 0);
-            this.hasDay2 = false;
-            this.day2Rounds = 0;
-        }else if(true /* TODO */){
-            // TODO
-            nbRounds = 9;
-            nbRoundsTop = (hasTops ? 3 : throw Error('This case might not be covered by the rules.'));
-            this.hasDay2 = true;
-            this.day2Rounds = 5;
+        }else if(roundMode == "swiss"){
+            // TODO read rules
+            if(nbPlayers <= 8){
+                nbRounds = 3;
+                nbRoundsTop = 0;
+                this.hasDay2 = false;
+                this.day2Rounds = 0;
+            }else if(nbPlayers <= 12){
+                nbRounds = 4;
+                nbRoundsTop = (hasTops ? 2 : 0);
+                this.hasDay2 = false;
+                this.day2Rounds = 0;
+            }else if(nbPlayers <= 20){
+                nbRounds = 5;
+                nbRoundsTop = (hasTops ? 2 : 0);
+                this.hasDay2 = false;
+                this.day2Rounds = 0;
+            }else if(nbPlayers <= 32){
+                nbRounds = 5;
+                nbRoundsTop = (hasTops ? 3 : 0);
+                this.hasDay2 = false;
+                this.day2Rounds = 0;
+            }else if(nbPlayers <= 64){
+                nbRounds = 6;
+                nbRoundsTop = (hasTops ? 3 : 0);
+                this.hasDay2 = false;
+                this.day2Rounds = 0;
+            }else if(nbPlayers <= 128){
+                nbRounds = 7;
+                nbRoundsTop = (hasTops ? 3 : 0);
+                this.hasDay2 = false;
+                this.day2Rounds = 0;
+            }else if(nbPlayers <= 226){// Not sure about that number
+                nbRounds = 8;
+                nbRoundsTop = (hasTops ? 3 : 0);
+                this.hasDay2 = false;
+                this.day2Rounds = 0;
+            }else if(nbPlayers <= 409){
+                nbRoungs = 9;
+                nbRoundsTop = (hasTops ? 3 : 0);
+                this.hasDay2 = true; // TODO it is possible to make it a 1-day event
+                this.day2Rounds = 5;
+            }else{
+                nbRounds = 10; // 9 if single day event
+                // TODO the above isn't covered in case of no top
+                nbRoundsTop = (hasTops ? 3 : 0);
+                this.hasDay2 = true;// TODO it is possible to make it a 1-day event
+                this.day2Rounds = 6;
+            }
+        }else{
+            throw Error('We don\'t know which round mode you are talking about');
         }
-    }else{
-        throw Error('We don\'t know which round mode you are talking about');
-    }
+    };
+    this.playLess = function(){ this.nbRounds--;};
 };
 function AgeJunior(nbPlayers, roundMode, hasTops){
-    AgeDivision(nbPlayers, roundMode, hasTops);// TODO check inheritance system
     this.nbJuniors = nbPlayers;
+    AgeJunior.prototype.setup(nbPlayers, roundMode, hasTops);
 }
+AgeJunior.prototype = new AgeDivision();
 function AgeSenior(nbPlayers, roundMode, hasTops){
-    AgeDivision(nbPlayers, roundMode, hasTops);// TODO check inheritance system
     this.nbSeniors = nbPlayers;
+    AgeSenior.prototype.setup(nbPlayers, roundMode, hasTops);
 }
+AgeSenior.prototype = new AgeDivision();
 function AgeMaster(nbPlayers, roundMode, hasTops){
-    AgeDivision(nbPlayers, roundMode, hasTops);// TODO check inheritance system
-    this.nbMasters = nbMasters;
+    this.nbJuniors = nbPlayers;
+    AgeMaster.prototype.setup(nbPlayers, roundMode, hasTops);
 }
+AgeMaster.prototype = new AgeDivision();
 function AgeJuniorSenior(nbJuniors, nbSeniors, roundMode, hasTops){
     // Only one of the two age divisions can be big enough to still have tops in swiss, despite being mixed to the other age division.
     if(nbJuniors > 8 && roundMode == "swiss"){
-        AgeDivision(nbJuniors, roundMode, hasTops);
+        AgeJuniorSenior.prototype.setup(nbJuniors, roundMode, hasTops);
     }else if(nbSeniors > 8 && roundMode == "swiss"){
-        AgeDivision(nbSeniors, roundMode, hasTops);
+        AgeJuniorSenior.prototype.setup(nbSeniors, roundMode, hasTops);
     }else if(roundMode == "single"){
-        AgeDivision(nbJuniors+nbSeniors, roundMode, hasTops);
+        AgeJuniorSenior.prototype.setup(nbJuniors + nbSeniors, roundMode, hasTops);
     }else{
-        AgeDivision(nbJuniors, roundMode, false);
+        AgeJuniorSenior.prototype.setup(nbJuniors, roundMode, false);
     }
     this.nbJuniors = nbJuniors;
     this.nbSeniors = nbSeniors;
     this.nbPlayers = nbJuniors + nbSeniors;
 }
+AgeJuniorSenior.prototype = new AgeDivision();
 function AgeSeniorMaster(nbSeniors, nbMasters, roundMode, hasTops){
     // Only one of the two age divisions can be big enough to still have tops in swiss, despite being mixed to the other age division.
     if(nbSeniors > 8 && roundMode == "swiss"){
-        AgeDivision(nbSeniors, roundMode, hasTops);
+        AgeSeniorMaster.prototype.setup(nbSeniors, roundMode, hasTops);
     }else if(nbMasters > 8 && roundMode == "swiss"){
-        AgeDivision(nbMasters, roundMode, hasTops);
+        AgeSeniorMaster.prototype.setup(nbMasters, roundMode, hasTops);
     }else if(roundMode == "single"){
-        AgeDivision(nbSeniors+nbMasters, roundMode, hasTops);
+        AgeSeniorMaster.prototype.setup(nbSeniors+nbMasters, roundMode, hasTops);
     }else{
-        AgeDivision(nbSeniors, roundMode, false);
+        AgeSeniorMaster.prototype.setup(nbSeniors, roundMode, false);
     }
     this.nbSeniors = nbSeniors;
     this.nbMasters = nbMasters;
     this.nbPlayers = nbSeniors + nbMasters;
 }
+AgeSeniorMaster.prototype = new AgeDivision();
 function AgeAll(nbJuniors, nbSeniors, nbMasters, roundMode, hasTops){
     // Only one of the two age divisions can be big enough to still have tops in swiss, despite being mixed to the other age division.
     if(nbJuniors > 8 && roundMode == "swiss"){
-        AgeDivision(nbJuniors, roundMode, hasTops);
+        AgeAll.prototype.setup(nbJuniors, roundMode, hasTops);
     }else if(nbSeniors > 8 && roundMode == "swiss"){
-        AgeDivision(nbSeniors, roundMode, hasTops);
+        AgeAll.prototype.setup(nbSeniors, roundMode, hasTops);
     }else if(nbMasters > 8 && roundMode == "swiss"){
-        AgeDivision(nbMasters, roundMode, hasTops);
+        AgeAll.prototype.setup(nbMasters, roundMode, hasTops);
     }else if(roundMode == "single"){
-        AgeDivision(nbJuniors+nbSeniors+nbMasters, roundMode, hasTops);
+        AgeAll.prototype.setup(nbJuniors+nbSeniors+nbMasters, roundMode, hasTops);
     }else{
-        AgeDivision(nbJuniors, roundMode, false);
+        AgeAll.prototype.setup(nbJuniors, roundMode, false);
     }
     this.nbJuniors = nbJuniors;
     this.nbSeniors = nbSeniors;
     this.nbMasters = nbMasters;
     this.nbPlayers = nbJuniors + nbSeniors + nbMasters;
 }
+AgeAll.prototype = new AgeDivision();
 /** Checks the date to determine the age division.
     Age division is based solely on birthdate's year.
     However, around July 15th (enough days after US nationals), every 
@@ -535,3 +630,7 @@ document.querySelector('#pairing_top_yes').addEventListener('touchend',onSwissTo
 document.querySelector('#pairing_top_no').addEventListener('click',onSwissNoTop);
 document.querySelector('#pairing_top_no').addEventListener('touchend',onSwissNoTop);
 
+
+var KnownList = new PlayerList('#known tbody');
+KnownList.setEvent(playerKnownSelect);
+var RegisteredList = new PlayerList('#registered tbody');
