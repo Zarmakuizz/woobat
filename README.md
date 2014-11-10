@@ -17,24 +17,25 @@ Simple Grid (MIT license) - css library for a responsive grid.
 TODO List
 ======
 PRIORITY
-* Initiate tournament - WIP
-* Register players - WIP
-* Resume initiation before starting tournament - WIP
-* Single Elimination pairing algorithm (with age groups)
-* Swiss Round pairing algorithm (with age groups and ties)
+* Initiate tournament - DONE
+* Register players - WIP - CORE DONE
+* Resume initiation before starting tournament - WIP - CORE DONE
+* Single Elimination pairing algorithm (with age groups) - SOON
+* Swiss Round pairing algorithm (with age groups and ties) - SOON
 * Tops after Swiss rounds consisting of either Single Elimination finals or more rounds + Single Eliminations
-* View to display pairings and enter tournament results
+* View to display pairings and enter tournament results - SOON
 * Defensive programming
 * Export finished tournament as a tdf
 
 SECONDARY
-* Import players from a user's players.xml file from TOM - DONE
-* Export players for the user's TOM - DONE
-* Edit/remove players from the list of known users
+* Import players from a user's players.xml file from TOM - CORE DONE
+* Export players for the user's TOM - CORE DONE
+* Edit/remove players from the list of known players
+* Edit/remove players from the list of registered players
 * Load tournament as a tdf - SOON
 * Export tournament as a tdf anytime - SOON
 * Offline mode
-* tweaks everywhere after testings TO BE DETERMINED
+* tweaks everywhere after testings WIP - TO BE DETERMINED
 
 
 Pokémon© is a trademark belonging to Nintendo, The Pokémon Company, and The Pokémon Company International. 
