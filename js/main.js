@@ -61,8 +61,8 @@ function PlayerList(source){
         players.splice(id,1);
         return true;
     }
-    function setE(evt){
-        this.evt = evt;
+    function setE(e){
+        evt = e;
     }
     /** Sort the player's list using a criteria.
         Inherited methods should update their views just after a sort, if they are in charge of any view listing players.
@@ -123,10 +123,10 @@ function PlayerList(source){
             td = document.createElement('td');
             td.innerHTML = player.ageGroup;
             tr.appendChild(td);
-            //if(this.evt != null && this.evt != undefined){
-                tr.addEventListener('click', this.evt);
-                tr.addEventListener('touchend', this.evt);
-            //}
+            if(evt != null && evt != undefined){
+                tr.addEventListener('click', evt);
+                tr.addEventListener('touchend', evt);
+            }
             view.appendChild(tr);
         });
     };
@@ -144,6 +144,7 @@ function PlayerList(source){
             players.filter(function(p){return p.ageGroup == 'Junior';}).length,
             players.filter(function(p){return p.ageGroup == 'Senior';}).length,
             players.filter(function(p){return p.ageGroup == 'Master';}).length]},
+        getEvent:          function(){ return evt;                       },
         importPlayers:     function(){ importP();                        },
         exportPlayers:     function(){ exportP();                        }
     }
@@ -610,6 +611,10 @@ document.querySelector('#id_form').action="javascript:void(0);";
 document.querySelector('#id_form_submit').addEventListener('click', idToPlayers);
 document.querySelector('#id_form_submit').addEventListener('touchend', idToPlayers);
 
+
+var KnownList = new PlayerList('#known tbody');
+var RegisteredList = new PlayerList('#registered tbody');
+KnownList.setEvent(playerKnownSelect);
 document.querySelector('#secret_load_players_xml').action="javascript:void(0);";
 document.querySelector('#lpx_input').addEventListener('change', importPlayers);
 document.querySelector('#load_players_xml').addEventListener('click',loadPlayerFile);
@@ -629,8 +634,3 @@ document.querySelector('#pairing_top_yes').addEventListener('click',onSwissTop);
 document.querySelector('#pairing_top_yes').addEventListener('touchend',onSwissTop);
 document.querySelector('#pairing_top_no').addEventListener('click',onSwissNoTop);
 document.querySelector('#pairing_top_no').addEventListener('touchend',onSwissNoTop);
-
-
-var KnownList = new PlayerList('#known tbody');
-KnownList.setEvent(playerKnownSelect);
-var RegisteredList = new PlayerList('#registered tbody');
