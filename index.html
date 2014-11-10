@@ -143,30 +143,13 @@
                     -->
                     <li class="col-1-1">
                         Run one swiss round less due to tops?
-                        <input type="radio" name="less_round" id="less_round_yes" value="true" checked="checked" disabled/><label for="less_round_yes">Yes</label>
-                        <input type="radio" name="less_round" id="less_round_no" value="false" disabled/><label for="less_round_no">No</label>
+                        <input type="radio" name="less_round" id="less_round_yes" value="true" disabled/><label for="less_round_yes">Yes</label>
+                        <input type="radio" name="less_round" id="less_round_no" value="false" checked="checked" disabled/><label for="less_round_no">No</label>
                     </li>
                 </ul>
-                <ul id="divisions_recap"><!-- Following lines might be hidden,
-                depending if a core age division has enough players -->
-                    <li><!-- Juniors -->
-                        <span>0</span> Juniors will play <input name="recap_junior" type="number" value="0" /> rounds.
-                    </li>
-                    <li><!-- Seniors -->
-                        <span>0</span> Seniors will play <input name="recap_senior" type="number" value="0" /> rounds.
-                    </li>
-                    <li><!-- Juniors & Seniors -->
-                        A mixed group of <span>0</span> Juniors and Seniors will play <input name="recap_js" type="number" value="0" /> rounds.
-                    </li>
-                    <li><!-- Masters -->
-                        <span>0</span> Masters will play <input name="recap_master" type="number" value="0" /> rounds.
-                    </li>
-                    <li><!-- Seniors & Masters-->
-                        A mixed group of <span>0</span> Seniors and Masters will play <input name="recap_sm" type="number" value="0" /> rounds.
-                    </li>
-                    <li><!-- Juniors & Seniors & Masters -->
-                        A mixed group of <span>0</span> Juniors, Seniors and Masters will play <input name="recap_jsm" type="number" value="0" /> rounds.
-                    </li>
+                <ul id="divisions_recap">
+                    <!-- To be filled based on the RegisteredList. -->
+                </ul>
 
             </form>
             <!-- players recap -->

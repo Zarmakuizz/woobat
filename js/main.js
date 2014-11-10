@@ -36,7 +36,7 @@ var addKnownPlayer = function(player){
 
 /** Class representing a list of players. May be used for both
     known players or registered players. 
-    @param source The queryselector pointing the tbody to fill */
+    @param source The querySelector pointing the tbody to fill */
 function PlayerList(source){
     var players = [];
     var evt = null;
@@ -81,9 +81,10 @@ function PlayerList(source){
                 break;
             case "ageGroup":
                 players.sort(function(a,b){
-                    return  (a.ageGroup == 'Junior' && b.ageGroup != 'Junior')
-                        ||  (a.ageGroup == 'Senior' && b.ageGroup == 'Master');
+                    return  (a.ageGroup == 'Master')
+                        ||  (a.ageGroup == 'Senior' && b.ageGroup != 'Master');
                 });
+                break;
             case "pid":
             default:
                 players.sort(function(a,b){return a.pid - b.pid;});
@@ -154,21 +155,25 @@ function PlayerList(source){
  */
 function AgeDivision(){
     this.setup = function(nbPlayers, roundMode, hasTops){
-        if(roundMode == "single"){ hasTops == false;};
-        this.nbJuniors = function(){throw Error('This should have been overriden if relevant.')};
-        this.nbSeniors = function(){throw Error('This should have been overriden if relevant.')};
-        this.nbMasters = function(){throw Error('This should have been overriden if relevant.')};
+        this.nbJuniors = 0;
+        this.nbSeniors = 0;
+        this.nbMasters = 0;
         this.nbPlayers = nbPlayers;
         this.roundMode = roundMode;
         this.hasTops = hasTops;
+        this.nbRounds = 0; // number of rounds
+        this.hasDay2 = false; // whether you take the bests players from day 1 swiss and make them play a new set of rounds
+        this.day2Rounds = 0; // number of rounds from the "day 2" tournament
+        this.hasTops = false; // whether there are tops or not.
+        this.nbRoundsTop = 0; // number of rounds in tops. number of players in tops is 2^nbRoundsTop.
         if(roundMode == "single"){
             var i=0;
             do{i++}while(nbPlayers/Math.pow(2,i) > 1.0);
             this.nbRoundsTop=0;
             this.nbRounds = i;
+            this.hasTops = false;
             this.hasDay2 = false;
         }else if(roundMode == "swiss"){
-            // TODO read rules
             if(nbPlayers <= 8){
                 nbRounds = 3;
                 nbRoundsTop = 0;
@@ -199,15 +204,15 @@ function AgeDivision(){
                 nbRoundsTop = (hasTops ? 3 : 0);
                 this.hasDay2 = false;
                 this.day2Rounds = 0;
-            }else if(nbPlayers <= 226){// Not sure about that number
+            }else if(nbPlayers <= 226){
                 nbRounds = 8;
                 nbRoundsTop = (hasTops ? 3 : 0);
                 this.hasDay2 = false;
                 this.day2Rounds = 0;
             }else if(nbPlayers <= 409){
-                nbRoungs = 9;
+                nbRounds = 9;
                 nbRoundsTop = (hasTops ? 3 : 0);
-                this.hasDay2 = true; // TODO it is possible to make it a 1-day event
+                this.hasDay2 = true; // TODO it seems possible to make it a 1-day event
                 this.day2Rounds = 5;
             }else{
                 nbRounds = 10; // 9 if single day event
@@ -221,20 +226,57 @@ function AgeDivision(){
         }
     };
     this.playLess = function(){ this.nbRounds--;};
+    this.playMore = function(){ this.nbRounds++;};
 };
 function AgeJunior(nbPlayers, roundMode, hasTops){
     this.nbJuniors = nbPlayers;
     AgeJunior.prototype.setup(nbPlayers, roundMode, hasTops);
+    this.recap = function(){
+        var result = nbPlayers + " Juniors will play "+nbRounds+ " rounds";
+        if(this.hasDay2){
+            result += " on day 1, followed by "+day2Rounds+" rounds on day 2,";
+        }
+        if(this.hasTops){
+            result += " with a top"+Math.pow(2,nbRoundsTop)+".";
+        }else{
+            result += ".";
+        }
+        return result;
+    };
 }
 AgeJunior.prototype = new AgeDivision();
 function AgeSenior(nbPlayers, roundMode, hasTops){
     this.nbSeniors = nbPlayers;
     AgeSenior.prototype.setup(nbPlayers, roundMode, hasTops);
+    this.recap = function(){
+        var result = nbPlayers + " Seniors will play "+nbRounds+ " rounds";
+        if(this.hasDay2){
+            result += " on day 1, followed by "+day2Rounds+" rounds on day 2,";
+        }
+        if(this.hasTops){
+            result += " with a top"+Math.pow(2,nbRoundsTop)+".";
+        }else{
+            result += ".";
+        }
+        return result;
+    };
 }
 AgeSenior.prototype = new AgeDivision();
 function AgeMaster(nbPlayers, roundMode, hasTops){
-    this.nbJuniors = nbPlayers;
+    this.nbMasters = nbPlayers;
     AgeMaster.prototype.setup(nbPlayers, roundMode, hasTops);
+    this.recap = function(){
+        var result = nbPlayers + " Masters will play "+nbRounds+ " rounds";
+        if(this.hasDay2){
+            result += " on day 1, followed by "+day2Rounds+" rounds on day 2,";
+        }
+        if(this.hasTops){
+            result += " with a top"+Math.pow(2,nbRoundsTop)+".";
+        }else{
+            result += ".";
+        }
+        return result;
+    };
 }
 AgeMaster.prototype = new AgeDivision();
 function AgeJuniorSenior(nbJuniors, nbSeniors, roundMode, hasTops){
@@ -251,6 +293,18 @@ function AgeJuniorSenior(nbJuniors, nbSeniors, roundMode, hasTops){
     this.nbJuniors = nbJuniors;
     this.nbSeniors = nbSeniors;
     this.nbPlayers = nbJuniors + nbSeniors;
+    this.recap = function(){
+        var result = nbPlayers + " players ("+nbJuniors+" Juniors and "+nbSeniors+" Seniors) will play "+nbRounds+ " rounds";
+        if(this.hasDay2){
+            result += " on day 1, followed by "+day2Rounds+" rounds on day 2,";
+        }
+        if(this.hasTops){
+            result += " with a top"+Math.pow(2,nbRoundsTop)+".";
+        }else{
+            result += ".";
+        }
+        return result;
+    };
 }
 AgeJuniorSenior.prototype = new AgeDivision();
 function AgeSeniorMaster(nbSeniors, nbMasters, roundMode, hasTops){
@@ -267,6 +321,18 @@ function AgeSeniorMaster(nbSeniors, nbMasters, roundMode, hasTops){
     this.nbSeniors = nbSeniors;
     this.nbMasters = nbMasters;
     this.nbPlayers = nbSeniors + nbMasters;
+    this.recap = function(){
+        var result = nbPlayers + "players ("+nbSeniors+" Seniors and "+nbMasters+" Masters) will play "+nbRounds+ " rounds";
+        if(this.hasDay2){
+            result += " on day 1, followed by "+day2Rounds+" rounds on day 2,";
+        }
+        if(this.hasTops){
+            result += " with a top"+Math.pow(2,nbRoundsTop)+".";
+        }else{
+            result += ".";
+        }
+        return result;
+    };
 }
 AgeSeniorMaster.prototype = new AgeDivision();
 function AgeAll(nbJuniors, nbSeniors, nbMasters, roundMode, hasTops){
@@ -278,7 +344,7 @@ function AgeAll(nbJuniors, nbSeniors, nbMasters, roundMode, hasTops){
     }else if(nbMasters > 8 && roundMode == "swiss"){
         AgeAll.prototype.setup(nbMasters, roundMode, hasTops);
     }else if(roundMode == "single"){
-        AgeAll.prototype.setup(nbJuniors+nbSeniors+nbMasters, roundMode, hasTops);
+        AgeAll.prototype.setup(nbJuniors+nbSeniors+nbMasters, roundMode, false);
     }else{
         AgeAll.prototype.setup(nbJuniors, roundMode, false);
     }
@@ -286,6 +352,18 @@ function AgeAll(nbJuniors, nbSeniors, nbMasters, roundMode, hasTops){
     this.nbSeniors = nbSeniors;
     this.nbMasters = nbMasters;
     this.nbPlayers = nbJuniors + nbSeniors + nbMasters;
+    this.recap = function(){
+        var result = this.nbPlayers + " players ("+nbJuniors+" Juniors, "+nbSeniors+" Seniors and "+nbMasters+" Masters) will play "+nbRounds+ " rounds";
+        if(this.hasDay2){
+            result += " on day 1, followed by "+day2Rounds+" rounds on day 2,";
+        }
+        if(this.hasTops){
+            result += " with a top"+Math.pow(2,nbRoundsTop)+".";
+        }else{
+            result += ".";
+        }
+        return result;
+    };
 }
 AgeAll.prototype = new AgeDivision();
 /** Checks the date to determine the age division.
@@ -317,6 +395,12 @@ var getAgeDivision = function(date){
     @param nbSeniors number of registered seniors
     @param nbMasters number of registered masters
     @return array of bools deciding if a row should be displayed.
+    result[0]: Juniors
+    result[1]: Seniors
+    result[2]: Juniors&Seniors
+    result[3]: Masters
+    result[4]: Seniors&Masters
+    result[5]: Juniors&Seniors&Masters
     */
 var getDivisions = function(nbJuniors, nbSeniors, nbMasters){
     var result = [false,false,false,false,false,false];
@@ -461,8 +545,7 @@ var playerRegSelect = function(elt){
 };
 /** When Swiss is chosen */
 var onSwissEvent = function(evt){
-    console.log("Swiss mode yeah");
-    // TODO manage consequences on round calculation for players
+    // Update form
     var form = document.querySelector('#pairing_system');
     var radio = form.querySelectorAll('input[name="pairing_top"]');
     radio[0].disabled = false;
@@ -471,20 +554,88 @@ var onSwissEvent = function(evt){
         radio = form.querySelectorAll('input[name="small_final"]');
         radio[0].disabled = false;
         radio[1].disabled = false;
-        /*
-        radio = form.querySelectorAll('input[name="day2"]');
+        radio = form.querySelectorAll('input[name="less_round"]');
         radio[0].disabled = false;
         radio[1].disabled = false;
-        //*/
     }else{
         radio = form.querySelectorAll('input[name="small_final"]');
         radio[0].disabled = true;
         radio[1].disabled = true;
+        radio = form.querySelectorAll('input[name="less_round"]');
+        radio[0].disabled = true;
+        radio[1].disabled = true;
+    }
+    // empty previous age divisions if any
+    var divisions = document.querySelector('#divisions_recap');
+    while(divisions.firstChild){
+        divisions.removeChild(divisions.firstChild);
+    }
+    // Display relevant age divisions
+    var ageCounts = RegisteredList.getTotalPerGroup()
+    var categories = getDivisions(ageCounts[0],ageCounts[1],ageCounts[2]);
+    var li = null;
+    if(categories[0]){ // Juniors
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeJunior(ageCounts[0], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_jr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+    }
+    if(categories[1]){ // Seniors
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeSenior(ageCounts[1], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_sr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+    }
+    if(categories[2]){ // Juniors&Seniors
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeJuniorSenior(ageCounts[0], ageCounts[1], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_jrsr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+    }
+    if(categories[3]){ // Masters
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeMaster(ageCounts[2], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_mr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+    }
+    if(categories[4]){ // Seniors&Masters
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeSeniorMaster(ageCounts[1], ageCounts[2], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_srmr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+    }
+    if(categories[5]){ // Juniors&Seniors&Masters
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeAll(ageCounts[0], ageCounts[1], ageCounts[2], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_jrsrmr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
     }
 };
 var onSingleEvent = function(evt){
-    console.log("Single Elimination mode yeah");
-    // TODO manage consequences on round calculation for players
     var form = document.querySelector('#pairing_system');
     var radio = form.querySelectorAll('input[name="pairing_top"]');
     radio[0].disabled = true;
@@ -497,6 +648,23 @@ var onSingleEvent = function(evt){
     radio[0].disabled = true;
     radio[1].disabled = true;
     //*/
+
+    // empty previous age divisions if any
+    var divisions = document.querySelector('#divisions_recap');
+    while(divisions.firstChild){
+        divisions.removeChild(divisions.firstChild);
+    }
+    // Display relevant age division: all categories mixed together
+    var ageCounts = RegisteredList.getTotalPerGroup()
+    radio = form.querySelectorAll('input[name="pairing_top"]');
+    var manageAge = new AgeAll(ageCounts[0], ageCounts[1], ageCounts[2], 'single', radio[0].checked);
+    radio = form.querySelectorAll('input[name="less_round"]');
+    if(radio[0].checked){ manageAge.playLess();}
+    li = document.createElement('li');
+    li.setAttribute('id','division_jrsrmr');
+    li.innerHTML = manageAge.recap();
+    divisions.appendChild(li);
+
 };
 var onSwissTop = function(evt){
     var form = document.querySelector('#pairing_system');
@@ -546,75 +714,43 @@ var idToPlayers = function(evt){
 /** Switches view.
  */
 var playersToRecap = function(evt){
-    // Count players and display relevant categories
-    var nbJuniors = parseInt(document.querySelector('#reg_junior').innerHTML);
-    var nbSeniors = parseInt(document.querySelector('#reg_senior').innerHTML);
-    var nbMasters = parseInt(document.querySelector('#reg_master').innerHTML);
-    var divisions = document.querySelectorAll('#divisions_recap li');
-    var show = getDivisions(nbJuniors, nbSeniors, nbMasters);
-    if(show[0]){
-        divisions[0].style.display="block";
-        divisions[0].querySelectorAll('span')[0].innerHTML = nbJuniors;
-        divisions[0].querySelectorAll('input[type="number"]')[0].min="3";
-        divisions[0].querySelectorAll('input[type="number"]')[0].max="3";
-        //divisions[0].querySelectorAll('input[type="number"]')[0].value="3";
-        // TODO calculate min and max for input
-        // FIXME: TOM has strange behaviors…
-    }else{
-        divisions[0].style.display="none";
-        divisions[0].querySelectorAll('span')[0].innerHTML = 0;
-        divisions[0].querySelectorAll('input[type="number"]')[0].min="0";
-        divisions[0].querySelectorAll('input[type="number"]')[0].max="0";
-        divisions[0].querySelectorAll('input[type="number"]')[0].value="0";
-    }
-    if(show[1]){
-        divisions[1].style.display="block";
-        divisions[1].querySelectorAll('span')[0].innerHTML = nbSeniors;
-    }else{
-        divisions[1].style.display="none";
-        divisions[1].querySelectorAll('span')[0].innerHTML = 0;
-    }
-    if(show[2]){
-        divisions[2].style.display="block";
-        divisions[2].querySelectorAll('span')[0].innerHTML = nbJuniors + nbSeniors;
-    }else{
-        divisions[2].style.display="none";
-        divisions[2].querySelectorAll('span')[0].innerHTML = 0;
-    }
-    if(show[3]){
-        divisions[3].style.display="block";
-        divisions[3].querySelectorAll('span')[0].innerHTML = nbMasters;
-    }else{
-        divisions[3].style.display="none";
-        divisions[3].querySelectorAll('span')[0].innerHTML = 0;
-    }
-    if(show[4]){
-        divisions[4].style.display="block";
-        divisions[4].querySelectorAll('span')[0].innerHTML = nbSeniors + nbMasters;
-    }else{
-        divisions[4].style.display="none";
-        divisions[4].querySelectorAll('span')[0].innerHTML = 0;
-    }
-    if(show[5]){
-        divisions[5].style.display="block";
-        divisions[5].querySelectorAll('span')[0].innerHTML = nbJuniors + nbSeniors + nbMasters;
-    }else{
-        divisions[5].style.display="none";
-        divisions[5].querySelectorAll('span')[0].innerHTML = 0;
-    }
     // Update view
     document.querySelector('#recap').style.display="block";
     document.querySelector('#add_players').style.display="none";
 };
 // Event handlers
+// first form view: enter data about the tournament
 document.querySelector('#id_form').action="javascript:void(0);";
 document.querySelector('#id_form_submit').addEventListener('click', idToPlayers);
 document.querySelector('#id_form_submit').addEventListener('touchend', idToPlayers);
 
-
+// second form view: players management
 var KnownList = new PlayerList('#known tbody');
 var RegisteredList = new PlayerList('#registered tbody');
 KnownList.setEvent(playerKnownSelect);
+
+var thead = document.querySelectorAll('#known thead th');
+thead[0].addEventListener('click',function(e){KnownList.sortByPid();});
+thead[0].addEventListener('touchend',function(e){KnownList.sortByPid();});
+thead[1].addEventListener('click',function(e){KnownList.sortByFirstName();});
+thead[1].addEventListener('touchend',function(e){KnownList.sortByFirstName();});
+thead[2].addEventListener('click',function(e){KnownList.sortByLastName();});
+thead[2].addEventListener('touchend',function(e){KnownList.sortByLastName();});
+thead[3].addEventListener('click',function(e){KnownList.sortByBirthDate();});
+thead[3].addEventListener('touchend',function(e){KnownList.sortByBirthDate();});
+thead[4].addEventListener('click',function(e){KnownList.sortByAgeGroup();});
+thead[4].addEventListener('touchend',function(e){KnownList.sortByAgeGroup();});
+thead = document.querySelectorAll('#registered thead th');
+thead[0].addEventListener('click',function(e){KnownList.sortByPid();});
+thead[0].addEventListener('touchend',function(e){KnownList.sortByPid();});
+thead[1].addEventListener('click',function(e){KnownList.sortByFirstName();});
+thead[1].addEventListener('touchend',function(e){KnownList.sortByFirstName();});
+thead[2].addEventListener('click',function(e){KnownList.sortByLastName();});
+thead[2].addEventListener('touchend',function(e){KnownList.sortByLastName();});
+thead[3].addEventListener('click',function(e){KnownList.sortByBirthDate();});
+thead[3].addEventListener('touchend',function(e){KnownList.sortByBirthDate();});
+thead[4].addEventListener('click',function(e){KnownList.sortByAgeGroup();});
+thead[4].addEventListener('touchend',function(e){KnownList.sortByAgeGroup();});
 document.querySelector('#secret_load_players_xml').action="javascript:void(0);";
 document.querySelector('#lpx_input').addEventListener('change', importPlayers);
 document.querySelector('#load_players_xml').addEventListener('click',loadPlayerFile);
@@ -625,7 +761,7 @@ document.querySelector('#export_players_xml').addEventListener('touchend',export
 document.querySelector('#add_player_form').action="javascript:void(0);";
 document.querySelector('#add_form_submit').addEventListener('click', addFormPlayer);
 document.querySelector('#add_form_submit').addEventListener('touchend', addFormPlayer);
-
+// third and last form view: tournament configuration
 document.querySelector('#radio_swiss').addEventListener('click',onSwissEvent);
 document.querySelector('#radio_swiss').addEventListener('touchend',onSwissEvent);
 document.querySelector('#radio_single').addEventListener('click',onSingleEvent);
