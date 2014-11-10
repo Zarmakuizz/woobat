@@ -166,6 +166,7 @@ function AgeDivision(){
         this.day2Rounds = 0; // number of rounds from the "day 2" tournament
         this.hasTops = false; // whether there are tops or not.
         this.nbRoundsTop = 0; // number of rounds in tops. number of players in tops is 2^nbRoundsTop.
+        this.hasSmallFinal = false;
         if(roundMode == "single"){
             var i=0;
             do{i++}while(nbPlayers/Math.pow(2,i) > 1.0);
@@ -227,8 +228,14 @@ function AgeDivision(){
             throw Error('We don\'t know which round mode you are talking about');
         }
     };
-    this.playLess = function(){ this.nbRounds--;};
-    this.playMore = function(){ this.nbRounds++;};
+    this.playLess = function(){
+        if(this.nbRounds > 3 && this.hasTops){
+            this.nbRounds--;
+        }
+    };
+    this.setSmallFinal = function(value){
+        this.hasSmallFinal = value;
+    }
 };
 function AgeJunior(nbPlayers, roundMode, hasTops){
     AgeJunior.prototype.setup(nbPlayers, roundMode, hasTops);
@@ -547,6 +554,84 @@ var playerRegSelect = function(elt){
         elt.className+=' selected';
     }
 };
+var rebuildLastRecap = function(){
+    var form = document.querySelector('#pairing_system');
+    // empty previous age divisions if any
+    var divisions = document.querySelector('#divisions_recap');
+    while(divisions.firstChild){
+        divisions.removeChild(divisions.firstChild);
+    }
+    // Display relevant age divisions
+    var ageCounts = RegisteredList.getTotalPerGroup()
+    var categories = getDivisions(ageCounts[0],ageCounts[1],ageCounts[2]);
+    var li = null;
+    if(categories[0]){ // Juniors
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeJunior(ageCounts[0], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(!radio[0].disabled && radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_jr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+        JuniorDivision = manageAge;
+    }
+    if(categories[1]){ // Seniors
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeSenior(ageCounts[1], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(!radio[0].disabled && radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_sr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+        SeniorDivision = manageAge;
+    }
+    if(categories[2]){ // Juniors&Seniors
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeJuniorSenior(ageCounts[0], ageCounts[1], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(!radio[0].disabled && radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_jrsr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+        JuniorSeniorDivision = manageAge;
+    }
+    if(categories[3]){ // Masters
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeMaster(ageCounts[2], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(!radio[0].disabled && radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_mr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+        MasterDivision = manageAge;
+    }
+    if(categories[4]){ // Seniors&Masters
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeSeniorMaster(ageCounts[1], ageCounts[2], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(!radio[0].disabled && radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_srmr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+        SeniorMasterDivision = manageAge;
+    }
+    if(categories[5]){ // Juniors&Seniors&Masters
+        radio = form.querySelectorAll('input[name="pairing_top"]');
+        var manageAge = new AgeAll(ageCounts[0], ageCounts[1], ageCounts[2], 'swiss', radio[0].checked);
+        radio = form.querySelectorAll('input[name="less_round"]');
+        if(!radio[0].disabled && radio[0].checked){ manageAge.playLess();}
+        li = document.createElement('li');
+        li.setAttribute('id','division_jrsrmr');
+        li.innerHTML = manageAge.recap();
+        divisions.appendChild(li);
+        AllDivision = manageAge;
+    }
+};
 /** When Swiss is chosen */
 var onSwissEvent = function(evt){
     // Update form
@@ -569,81 +654,7 @@ var onSwissEvent = function(evt){
         radio[0].disabled = true;
         radio[1].disabled = true;
     }
-    // empty previous age divisions if any
-    var divisions = document.querySelector('#divisions_recap');
-    while(divisions.firstChild){
-        divisions.removeChild(divisions.firstChild);
-    }
-    // Display relevant age divisions
-    var ageCounts = RegisteredList.getTotalPerGroup()
-    var categories = getDivisions(ageCounts[0],ageCounts[1],ageCounts[2]);
-    var li = null;
-    if(categories[0]){ // Juniors
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeJunior(ageCounts[0], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_jr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        JuniorDivision = manageAge;
-    }
-    if(categories[1]){ // Seniors
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeSenior(ageCounts[1], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_sr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        SeniorDivision = manageAge;
-    }
-    if(categories[2]){ // Juniors&Seniors
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeJuniorSenior(ageCounts[0], ageCounts[1], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_jrsr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        JuniorSeniorDivision = manageAge;
-    }
-    if(categories[3]){ // Masters
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeMaster(ageCounts[2], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_mr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        MasterDivision = manageAge;
-    }
-    if(categories[4]){ // Seniors&Masters
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeSeniorMaster(ageCounts[1], ageCounts[2], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_srmr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        SeniorMasterDivision = manageAge;
-    }
-    if(categories[5]){ // Juniors&Seniors&Masters
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeAll(ageCounts[0], ageCounts[1], ageCounts[2], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_jrsrmr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        AllDivision = manageAge;
-    }
+    rebuildLastRecap();
 };
 var onSingleEvent = function(evt){
     var form = document.querySelector('#pairing_system');
@@ -653,6 +664,9 @@ var onSingleEvent = function(evt){
     radio = form.querySelectorAll('input[name="small_final"]');
     radio[0].disabled = false;
     radio[1].disabled = false;
+    radio = form.querySelectorAll('input[name="less_round"]');
+    radio[0].disabled = true;
+    radio[1].disabled = true;
     /*
     radio = form.querySelectorAll('input[name="day2"]');
     radio[0].disabled = true;
@@ -668,8 +682,6 @@ var onSingleEvent = function(evt){
     var ageCounts = RegisteredList.getTotalPerGroup()
     radio = form.querySelectorAll('input[name="pairing_top"]');
     var manageAge = new AgeAll(ageCounts[0], ageCounts[1], ageCounts[2], 'single', radio[0].checked);
-    radio = form.querySelectorAll('input[name="less_round"]');
-    if(radio[0].checked){ manageAge.playLess();}
     li = document.createElement('li');
     li.setAttribute('id','division_jrsrmr');
     li.innerHTML = manageAge.recap();
@@ -690,83 +702,8 @@ var onSwissTop = function(evt){
     radio = form.querySelectorAll('input[name="less_round"]');
     radio[0].disabled = false;
     radio[1].disabled = false;
-    
-    // empty previous age divisions if any
-    var divisions = document.querySelector('#divisions_recap');
-    while(divisions.firstChild){
-        divisions.removeChild(divisions.firstChild);
-    }
-    // Display relevant age divisions
-    var ageCounts = RegisteredList.getTotalPerGroup()
-    var categories = getDivisions(ageCounts[0],ageCounts[1],ageCounts[2]);
-    var li = null;
-    if(categories[0]){ // Juniors
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeJunior(ageCounts[0], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_jr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        JuniorDivision = manageAge;
-    }
-    if(categories[1]){ // Seniors
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeSenior(ageCounts[1], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_sr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        SeniorDivision = manageAge;
-    }
-    if(categories[2]){ // Juniors&Seniors
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeJuniorSenior(ageCounts[0], ageCounts[1], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_jrsr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        JuniorSeniorDivision = manageAge;
-    }
-    if(categories[3]){ // Masters
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeMaster(ageCounts[2], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_mr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        MasterDivision = manageAge;
-    }
-    if(categories[4]){ // Seniors&Masters
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeSeniorMaster(ageCounts[1], ageCounts[2], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_srmr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        SeniorMasterDivision = manageAge;
-    }
-    if(categories[5]){ // Juniors&Seniors&Masters
-        radio = form.querySelectorAll('input[name="pairing_top"]');
-        var manageAge = new AgeAll(ageCounts[0], ageCounts[1], ageCounts[2], 'swiss', radio[0].checked);
-        radio = form.querySelectorAll('input[name="less_round"]');
-        if(radio[0].checked){ manageAge.playLess();}
-        li = document.createElement('li');
-        li.setAttribute('id','division_jrsrmr');
-        li.innerHTML = manageAge.recap();
-        divisions.appendChild(li);
-        AllDivision = manageAge;
-    }
-}
+    rebuildLastRecap();
+};
 var onSwissNoTop = function(evt){
     var form = document.querySelector('#pairing_system');
     radio = form.querySelectorAll('input[name="small_final"]');
@@ -780,6 +717,30 @@ var onSwissNoTop = function(evt){
     radio = form.querySelectorAll('input[name="less_round"]');
     radio[0].disabled = true;
     radio[1].disabled = true;
+
+    rebuildLastRecap();
+}
+var onSmallFinal = function(evt){
+    if(JuniorDivision != null){ JuniorDivision.setSmallFinal(true);}
+    if(SeniorDivision != null){ SeniorDivision.setSmallFinal(true);}
+    if(JuniorSeniorDivision != null){ JuniorSeniorDivision.setSmallFinal(true);}
+    if(MasterDivision != null){ MasterDivision.setSmallFinal(true);}
+    if(SeniorMasterDivision != null){ SeniorMasterDivision.setSmallFinal(true);}
+    if(AllDivision != null){ AllDivision.setSmallFinal(true);}
+}
+var onNoSmallFinal = function(evt){
+    if(JuniorDivision != null){ JuniorDivision.setSmallFinal(false);}
+    if(SeniorDivision != null){ SeniorDivision.setSmallFinal(false);}
+    if(JuniorSeniorDivision != null){ JuniorSeniorDivision.setSmallFinal(false);}
+    if(MasterDivision != null){ MasterDivision.setSmallFinal(false);}
+    if(SeniorMasterDivision != null){ SeniorMasterDivision.setSmallFinal(false);}
+    if(AllDivision != null){ AllDivision.setSmallFinal(false);}
+}
+var onLessRound = function(evt){
+    rebuildLastRecap();
+}
+var onNormalRound = function(evt){
+    rebuildLastRecap();
 }
 /** Event fired when the first view is done. */
 var idToPlayers = function(evt){
