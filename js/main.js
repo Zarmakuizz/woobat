@@ -397,8 +397,8 @@ var exportPlayers = function(evt){
     pom.click();
 
 };
-/** Event fired when a player is added to the
-tournament     using the add form. */ 
+/** Event fired when a player is added to the tournament
+    using the add form. */ 
 var addFormPlayer = function(evt){     
     //Check if the form has some empty values or incorrect ones     
     var addForm = document.querySelector('#add_player_form');     
@@ -418,7 +418,7 @@ var addFormPlayer = function(evt){
     }else{ // We need to go deeper at checking a date
         // The value matches the regex above, so we get 3 strings of digits
         var raw = allInputs[3].value.match(/\d+/g);
-        var date = [parseInt(raw[0]),parseInt(raw[1]),parseInt([raw2])];
+        var date = [parseInt(raw[0]),parseInt(raw[1]),parseInt([raw[2]])];
         // wrong month and day
         if(date[0] > 12 && date[1] > 12){return;}
         // days are the 1st argument - as things should be, but aren't in Murica
@@ -426,8 +426,8 @@ var addFormPlayer = function(evt){
             date = date.swapItems(0,1);
         }
         // Let's rebuild the raw before formatting the date
-        raw[0] = pad(day[0],2);
-        raw[1] = pad(day[1],2);
+        raw[0] = pad(date[0],2);
+        raw[1] = pad(date[1],2);
         allInputs[3].value = raw[0]+"/"+raw[1]+"/"+raw[2];
     }
 
