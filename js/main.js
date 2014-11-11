@@ -91,15 +91,59 @@ function PlayerList(source){
                 break;
         }
     }
-    /** Import players from XML 
-        TODO */
-    function importP(){
-        // TODO
+    /** Import players from a XML file. Both the players.xml file and the tdf 
+        file use the same xml structure to store the players.
+        @param playersDOM a XML DOM node containing the players.*/
+    function importP(playersDOM){
+        for(var i=0; i<playersDOM.childElementCount; i++){
+            var p = new Player(playersDOM.children[i].getAttribute('userid'),
+            playersDOM.children[i].querySelector('firstname').innerHTML,
+            playersDOM.children[i].querySelector('lastname').innerHTML,
+            playersDOM.children[i].querySelector('birthdate').innerHTML);
+            // TODO Check userid and birthdate
+            // TODO use a Date type for birthdate
+            addP(p);         
+        }
     };
-    /** Export players for a XML file
-        TODO */
+    /** Export players for a XML file. Both the players.xml file and the tdf
+        file use the same xml structure to store the players.
+        @return result a XML DOM node containing the players. */
     function exportP(){
-        // TODO
+        var result = document.createElement('players');
+        players.forEach(function(player,i,array){
+            var p = document.createElement('player');
+            // player id
+            p.setAttribute('userid',player.pid);
+            // first name
+            var child = document.createElement('firstname');
+            var txt = document.createTextNode(player.firstName);
+            child.appendChild(txt);
+            p.appendChild(child);
+            // last name
+            child = document.createElement('lastname');
+            txt = document.createTextNode(player.lastName);
+            child.appendChild(txt);
+            p.appendChild(child);
+            // birthdate
+            // TODO use a Date type for birthdate
+            child = document.createElement('birthdate');
+            txt = document.createTextNode(player.birthDate);
+            child.appendChild(txt);
+            p.appendChild(child)
+            // Two useless attributes, but still asked by TOM
+            var d = new Date();
+            child = document.createElement('creationdate');
+            txt = document.createTextNode((d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear()+" "+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds());
+            child.appendChild(txt);
+            p.appendChild(child);
+            child = document.createElement('lastmodifieddate');
+            txt = document.createTextNode((d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear()+" "+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds());
+            child.appendChild(txt);
+            p.appendChild(child);
+
+            result.appendChild(p);
+        });
+        return result;
     };
     /** Updates the view with the current state of the list*/
     function updateView(){
@@ -133,21 +177,21 @@ function PlayerList(source){
     };
     return {
         addPlayer:   function(player){ addP(player); updateView();},
-        removePlayer:function(player){ rmP(player);         updateView();},
-        setEvent:    function(evt)   { setE(evt);           updateView();},
-        sortByPid:         function(){ sortP('pid');        updateView();},
-        sortByFirstName:   function(){ sortP('firstName');  updateView();},
-        sortByLastName:    function(){ sortP('lastName');   updateView();},
-        sortByBirthDate:   function(){ sortP('birthDate');  updateView();},
-        sortByAgeGroup:    function(){ sortP('ageGroup');   updateView();},
-        getTotalPlayers:   function(){ return players.length},
+        removePlayer:function(player){ rmP(player);         updateView();    },
+        setEvent:    function(evt)   { setE(evt);           updateView();    },
+        sortByPid:         function(){ sortP('pid');        updateView();    },
+        sortByFirstName:   function(){ sortP('firstName');  updateView();    },
+        sortByLastName:    function(){ sortP('lastName');   updateView();    },
+        sortByBirthDate:   function(){ sortP('birthDate');  updateView();    },
+        sortByAgeGroup:    function(){ sortP('ageGroup');   updateView();    },
+        getTotalPlayers:   function(){ return players.length;                },
         getTotalPerGroup:  function(){ return [
             players.filter(function(p){return p.ageGroup == 'Junior';}).length,
             players.filter(function(p){return p.ageGroup == 'Senior';}).length,
             players.filter(function(p){return p.ageGroup == 'Master';}).length]},
-        getEvent:          function(){ return evt;                       },
-        importPlayers:     function(){ importP();                        },
-        exportPlayers:     function(){ exportP();                        }
+        getEvent:          function(){ return evt;                           },
+        importPlayers:function(playersDOM){ importP(playersDOM);updateView();},
+        exportPlayers:     function(){ return exportP();                     }
     }
 };
 /** Class representing an element of the list of possible age divisions.
@@ -456,38 +500,18 @@ var importPlayers = function(evt){
         var strContent = this.result;
         // TODO defensive programming
         var parsed = new DOMParser().parseFromString(strContent, "text/xml");
-        var players = parsed.querySelectorAll('player');
-        for(var i=0; i<players.length; i++){
-            var p = new Player(players[i].getAttribute('userid'),
-            players[i].querySelector('firstname').innerHTML,
-            players[i].querySelector('lastname').innerHTML,
-            players[i].querySelector('birthdate').innerHTML);
-            // TODO Check userid and birthdate
-            addKnownPlayer(p);         
-        }
+        var players = parsed.querySelector('players');
+        KnownList.importPlayers(players);
     }
     reader.readAsText(xmlFile); 
 }; 
-/** Export list of players following the syntax in data/players.xml */
+/** Export list of known players following the syntax in data/players.xml */
 var exportPlayers = function(evt){
-    var playersTr = document.querySelectorAll('#known tbody tr');
-    var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<players>\n';
-    for(var i=0; i<playersTr.length; i++){
-        var player = trToPlayer(playersTr[i]);
-        xml += '\t<player userid="'+player.pid+'">\n';
-        xml += '\t\t<firstname>'+player.firstName+'</firstname>\n';
-        xml += '\t\t<lastname>'+player.lastName+'</lastname>\n';
-        xml += '\t\t<birthdate>'+player.birthDate+'</birthdate>\n';
-        xml += '\t\t<creationdate>'+'09/20/2014 10:10:14'+'</creationdate>\n';
-        xml += '\t\t<lastmodifieddate>'+'09/20/2014 10:10:14'+'</lastmodifieddate>\n';
-        // TODO get current date
-        xml += '\t</player>\n;'
-    }
-    xml+='\n</players>'
-
+    var playersNode = KnownList.exportPlayers();
     // Offer a file to download
     var pom = document.querySelector('#lpx_export'); // get a hidden <a>
-    pom.setAttribute('href','data:application/xml;charset=utf-8,'+encodeURIComponent(xml));
+    pom.setAttribute('href','data:application/xml;charset=utf-8,'+
+        encodeURIComponent( '<?xml version="1.0" encoding="UTF-8"?>\n'+formatXml(playersNode) ));
     pom.setAttribute('download','players.xml');
     pom.click();
 
