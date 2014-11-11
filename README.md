@@ -28,8 +28,8 @@ PRIORITY
 * Export finished tournament as a tdf
 
 SECONDARY
-* Import players from a user's players.xml file from TOM - CORE DONE
-* Export players for the user's TOM - CORE DONE
+* Import players from a user's players.xml file from TOM - DONE
+* Export players for the user's TOM - DONE
 * Edit/remove players from the list of known players
 * Edit/remove players from the list of registered players
 * Load tournament as a tdf - SOON
