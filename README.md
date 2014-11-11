@@ -13,6 +13,7 @@ Technologies used
 As a webapp, mostly HTML5 things - so a lot of Javascript.
 
 Simple Grid (MIT license) - css library for a responsive grid.
+jsUnity (MIT license) - js library for unit testing.
 
 TODO List
 ======
@@ -35,7 +36,7 @@ SECONDARY
 * Load tournament as a tdf - SOON
 * Export tournament as a tdf anytime - SOON
 * Offline mode
-* tweaks everywhere after testings WIP - TO BE DETERMINED
+* tweaks everywhere after testings WIP
 
 
 Pokémon© is a trademark belonging to Nintendo, The Pokémon Company, and The Pokémon Company International. 
